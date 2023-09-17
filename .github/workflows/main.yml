@@ -29,7 +29,7 @@ jobs:
         with:
           working-directory: example
 
-      - npm: Test
+      - name: Test
         run: cd example & npm run test
 
       - name: Build
