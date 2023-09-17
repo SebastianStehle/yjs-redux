@@ -1,5 +1,5 @@
-import { ImmutableMap, ImmutableObject } from "./../immutability";
-import { SourceObject, ValueResolver } from "./../../../src";
+import { ImmutableMap, ImmutableObject } from './../immutability';
+import { SourceObject, ValueResolver } from './../../../src';
 
 interface RootProps {
     lists: ImmutableMap<TaskList>;

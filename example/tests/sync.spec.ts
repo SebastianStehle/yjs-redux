@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { SyncOptions, syncToYJS } from './../../src';
+import { DefaultSyncOptions, SyncOptions, syncToYJS } from './../../src';
 import { testInitialSync } from './test-utils';
 
 const options: SyncOptions = {
-    typeResolvers: {
-    },
-    valueResolvers: {
-    },
+    ...DefaultSyncOptions,
+    isValueType: value => (value as any)['isValueType'] === true,
     syncAlways: true
 };
 
@@ -126,6 +124,22 @@ describe('Redux objects', () => {
             120,
             33
         ];
+
+        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+
+        expect(result).toEqual(update);
+    });
+
+    test('should update value in value type', () => {
+        const initial =  () => ({});
+
+        const update = {
+            update: {
+                isValueType: true,
+                key1: 1,
+                key2: 2,
+            }
+        };
 
         const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
 

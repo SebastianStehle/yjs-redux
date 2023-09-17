@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ImmutableList } from "./immutable-list";
-import { ArrayDiff, ArrayTypeResolver, SourceArray } from "./../../src";
+import { ImmutableList } from './immutable-list';
+import { ArrayDiff, ArrayTypeResolver, SourceArray } from './../../src';
 
 export default class ImmutableListResolver implements ArrayTypeResolver<ImmutableList<unknown>> {
     public readonly sourceType = 'Array';

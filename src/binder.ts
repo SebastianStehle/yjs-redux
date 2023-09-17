@@ -3,7 +3,8 @@ import * as Y from 'yjs';
 import { Middleware, Reducer } from 'redux';
 import { initToYJS, syncToYJS } from './sync-to-yjs';
 import { syncFromYJS } from './sync-from-yjs';
-import { SyncOptions } from './sync-utils';
+import { DefaultSyncOptions, SyncOptions } from './sync-utils';
+import { isFunction, isObject } from './utils';
 
 const SYNC_TYPE = 'SYNC_FROM_JS'
 
@@ -11,7 +12,21 @@ const syncAction = (payload: { value: unknown; sliceName: string | undefined }) 
     return { type: SYNC_TYPE, payload };
 }
 
-export function bind(doc: Y.Doc, sliceName: string | undefined, options: SyncOptions) {
+export function bind(doc: Y.Doc, sliceName: string | undefined, options: Partial<SyncOptions>) {
+    const actualOptions: SyncOptions = { ...DefaultSyncOptions, ...options };
+
+    if (!isFunction(actualOptions.isValueType)) {
+        actualOptions.isValueType = DefaultSyncOptions.isValueType;
+    }
+
+    if (!isObject(actualOptions.typeResolvers)) {
+        actualOptions.typeResolvers = DefaultSyncOptions.typeResolvers;
+    }
+
+    if (!isObject(actualOptions.valueResolvers)) {
+        actualOptions.valueResolvers = DefaultSyncOptions.valueResolvers;
+    }
+
     const middleware = () => {
         const middleware: Middleware = store => {
             const getState = () => {
@@ -26,7 +41,7 @@ export function bind(doc: Y.Doc, sliceName: string | undefined, options: SyncOpt
 
             let root: Y.AbstractType<any>;
             doc.transact(() => {
-                root = initToYJS(getState(), doc, sliceName, options);
+                root = initToYJS(getState(), doc, sliceName, actualOptions);
             });
 
             root!.observeDeep((events, transition) => {
@@ -35,7 +50,7 @@ export function bind(doc: Y.Doc, sliceName: string | undefined, options: SyncOpt
                 }
 
                 const stateOld = getState();
-                const stateNew = syncFromYJS<any>(stateOld, events, options);
+                const stateNew = syncFromYJS<any>(stateOld, events, actualOptions);
 
                 if (stateOld !== stateNew) {
                     store.dispatch(syncAction({ value: stateNew, sliceName }));
@@ -49,7 +64,7 @@ export function bind(doc: Y.Doc, sliceName: string | undefined, options: SyncOpt
                 
                 if (action.type !== SYNC_TYPE) {
                     doc.transact(() => {
-                        syncToYJS(getState(), stateOld, root, options);
+                        syncToYJS(getState(), stateOld, root, actualOptions);
                     });
                 }
     

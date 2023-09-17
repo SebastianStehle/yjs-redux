@@ -7,9 +7,8 @@
     "build": "tsc && vite build",
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "test": "vitest",
+    "test": "vitest --browser",
     "test:ci": "vitest run --browser.name=chromium --browser.provider=playwright --browser.headless",
-    "test:browser": "vitest --browser",
     "preview": "vite preview"
   },
   "dependencies": {

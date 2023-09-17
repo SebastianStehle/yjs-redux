@@ -6,7 +6,19 @@ export type SyncOptions = {
     valueResolvers: Record<string, ValueResolver<unknown>>;
 
     // True when all objects should be synced.
-    syncAlways?: boolean;
+    syncAlways: boolean;
+
+    // Return true, when a value should be handled as value object and not be mapped to an array.
+    isValueType: (value: SourceArray | SourceObject) => boolean;
+};
+
+export const DefaultSyncOptions: SyncOptions = {
+    typeResolvers: {
+    },
+    valueResolvers: {
+    },
+    syncAlways: false,
+    isValueType: () => false
 };
 
 export type SyncStrategy = 'Always' | 'IsEntity';

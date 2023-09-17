@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { syncToYJS, SourceObject, SyncOptions, ValueResolver } from './../../src';
+import { syncToYJS, SourceObject, SyncOptions, ValueResolver, DefaultSyncOptions } from './../../src';
 import { testInitialSync } from './test-utils';
 
 class Color {
@@ -30,8 +30,7 @@ class ColorValueResolver implements ValueResolver<Color> {
 }
 
 const options: SyncOptions = {
-    typeResolvers: {
-    },
+    ...DefaultSyncOptions,
     valueResolvers: {
         [Color.TYPE_NAME]: ColorValueResolver.INSTANCE
     },

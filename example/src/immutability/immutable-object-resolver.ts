@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ImmutableObject } from "./immutable-object";
-import { ObjectDiff, ObjectTypeResolver, SourceObject } from "./../../src";
+import { ImmutableObject } from './immutable-object';
+import { ObjectDiff, ObjectTypeResolver, SourceObject } from './../../src';
 
 export default class ImmutableObjectResolver<T extends ImmutableObject<any>> implements ObjectTypeResolver<T> {
     public readonly sourceType = 'Object';

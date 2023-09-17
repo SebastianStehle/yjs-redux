@@ -9,3 +9,7 @@ export function isObject(value: any): value is Object {
 export function isString(value: any): value is string {
     return typeof value === 'string' || value instanceof String;
 }
+
+export function isFunction(value: any): value is Function {
+    return typeof value === 'function';
+}

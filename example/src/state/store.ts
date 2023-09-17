@@ -5,11 +5,11 @@ import { WebrtcProvider } from 'y-webrtc';
 import { Root, TaskItem, TaskList } from './state';
 import tasksReducer from './reducer';
 import { bind, SyncOptions } from './../../../src';
-import { ImmutableList, ImmutableMap, ImmutableSet } from '../immutability';
-import ImmutableObjectResolver from '../immutability/immutable-object-resolver';
-import ImmutableListResolver from '../immutability/immutable-list-resolver';
-import ImmutableMapResolver from '../immutability/immutable-map-resolver';
-import ImmutableSetResolver from '../immutability/immutable-set-resolver';
+import { ImmutableList, ImmutableMap, ImmutableSet } from './../immutability';
+import ImmutableObjectResolver from './../immutability/immutable-object-resolver';
+import ImmutableListResolver from './../immutability/immutable-list-resolver';
+import ImmutableMapResolver from './../immutability/immutable-map-resolver';
+import ImmutableSetResolver from './../immutability/immutable-set-resolver';
 
 const ydoc = new Y.Doc();
 

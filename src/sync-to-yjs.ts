@@ -9,6 +9,7 @@ import { SourceArray, SourceObject, SyncOptions } from './sync-utils';
 import { isArray, isObject } from './utils';
 
 function valueToYJS(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
+    console.log('FOrraaO');
     if (!source) {
         return source;
     }
@@ -17,11 +18,11 @@ function valueToYJS(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: 
 
     if (!typeName) {
         if (options.syncAlways) {
-            if (isArray(source)) {
+            if (isArray(source) && !options.isValueType(source)) {
                 return valueToYJSArray(source, source, [], options, doc, sliceName);
             }
             
-            if (isObject(source)) {
+            if (isObject(source) && !options.isValueType(source)) {
                 return valueToYJSObject(source, source, {}, options, doc, sliceName);
             }
         }

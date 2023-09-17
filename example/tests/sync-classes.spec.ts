@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { isArray, isString } from './..//../src/utils';
-import { ArrayDiff, ArrayTypeResolver, ObjectDiff, ObjectTypeResolver, SourceArray, SourceObject, SyncOptions, syncToYJS, TypeProperties } from './../../src';
+import { isArray, isString } from './../../src/utils';
+import { ArrayDiff, ArrayTypeResolver, DefaultSyncOptions, ObjectDiff, ObjectTypeResolver, SourceArray, SourceObject, SyncOptions, syncToYJS, TypeProperties } from './../../src';
 import { testInitialSync } from './test-utils';
 
 let id = 0;
@@ -100,6 +100,7 @@ class ImmutableObjectResolver<T> implements ObjectTypeResolver<ImmutableObject<T
 }
 
 const options: SyncOptions = {
+    ...DefaultSyncOptions,
     typeResolvers: {
         [ImmutableArray.TYPE_NAME]: ImmutableArrayResolver.INSTANCE,
         [ImmutableObject.TYPE_NAME]: ImmutableObjectResolver.INSTANCE
