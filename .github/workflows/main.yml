@@ -25,7 +25,7 @@ jobs:
 
       - name: Run Tests
         working-directory: ./example
-        run: npm run test
+        run: npm run test:ci
           
       - name: Install Dependencies
         working-directory: ./
