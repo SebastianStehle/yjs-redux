@@ -2,7 +2,7 @@ name: CI
 on: [push]
 jobs:
   build:
-    name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+    name: Build on Node ${{ matrix.node }} and ${{ matrix.os }}
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -19,16 +19,18 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install deps and build (with cache)
-        uses: bahmutov/npm-install@v1
+      - name: Install Example
+        working-directory: ./example
+        run: npm i
 
-      - name: Install deps and build (with cache) of example
-        uses: bahmutov/npm-install@v1
-        with:
-          working-directory: example
-
-      - name: Test
-        run: cd example & npm run test
-
-      - name: Build
+      - name: Run Tests
+        working-directory: ./example
+        run: npm npm run test
+          
+      - name: Install Dependencies
+        working-directory: ./
+        run: npm i
+          
+      - name: Build Library
+        working-directory: ./exampe
         run: npm run build
