@@ -8,7 +8,7 @@
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest",
-    "test:ci": "vitest run --browser --browser.headless",
+    "test:ci": "vitest run --browser.name=chrome --browser.headless",
     "test:browser": "vitest --browser",
     "preview": "vite preview"
   },

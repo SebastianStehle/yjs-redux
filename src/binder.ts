@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as Y from 'yjs';
 import { Middleware, Reducer } from 'redux';
 import { initToYJS, syncToYJS } from './sync-to-yjs';
