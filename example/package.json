@@ -8,7 +8,7 @@
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest",
-    "test:ci": "vitest run --browser.name=chrome --browser.headless",
+    "test:ci": "vitest run --browser.name=chromium --browser.provider=playwright --browser.headless",
     "test:browser": "vitest --browser",
     "preview": "vite preview"
   },
@@ -33,6 +33,7 @@
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "playwright": "^1.38.0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "webdriverio": "^8.16.10"
