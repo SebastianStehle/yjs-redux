@@ -5,8 +5,6 @@ import { testInitialSync } from './test-utils';
 
 const options: SyncOptions = {
     ...DefaultSyncOptions,
-    isValueType: value => (value as any)['isValueType'] === true,
-    syncAlways: true
 };
 
 describe('Redux objects', () => {
@@ -131,6 +129,11 @@ describe('Redux objects', () => {
     });
 
     test('should update value in value type', () => {
+        const actualOptions = {
+            ...options,
+            isValueType: value => (value as any)['isValueType'] === true,
+        };
+
         const initial =  () => ({});
 
         const update = {
@@ -141,7 +144,7 @@ describe('Redux objects', () => {
             }
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, actualOptions), actualOptions);
 
         expect(result).toEqual(update);
     });

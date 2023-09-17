@@ -17,7 +17,7 @@ export const DefaultSyncOptions: SyncOptions = {
     },
     valueResolvers: {
     },
-    syncAlways: false,
+    syncAlways: true,
     isValueType: () => false
 };
 

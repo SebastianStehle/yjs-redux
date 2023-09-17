@@ -105,9 +105,6 @@ const options: SyncOptions = {
         [ImmutableArray.TYPE_NAME]: ImmutableArrayResolver.INSTANCE,
         [ImmutableObject.TYPE_NAME]: ImmutableObjectResolver.INSTANCE
     },
-    valueResolvers: {
-    },
-    syncAlways: true
 };
 
 describe('Redux classes', () => {

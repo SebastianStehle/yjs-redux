@@ -58,7 +58,7 @@ By default we distinguish between custom types, that have the following properti
 
 Only when the type name is present values are either mapped to `Y.Array` or `Y.Map` instances. This guarantees that values that should be treated as atomar values are not updated partially. Consider an object position with an **x** and **y** property. If we would map this property to a map and two users would move an object simultanously, we could end up with an position that is a combination of both updates.
 
-If you want to map all values you can set the `syncAlways` property to `true`.
+If you do not want to map arrays and objects to yjs types and only custom types, you can set the `syncAlways` property to `false`.
 
 ### Insert and Removal detection
 
@@ -98,12 +98,9 @@ class ColorValueResolver implements ValueResolver<Color> {
 }
 
 const options: SyncOptions = {
-    typeResolvers: {
-    },
     valueResolvers: {
         [Color.TYPE_NAME]: ColorValueResolver.INSTANCE
-    },
-    syncAlways: true
+    }
 };
 ```
 

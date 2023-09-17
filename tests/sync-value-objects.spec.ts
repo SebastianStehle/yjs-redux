@@ -34,7 +34,6 @@ const options: SyncOptions = {
     valueResolvers: {
         [Color.TYPE_NAME]: ColorValueResolver.INSTANCE
     },
-    syncAlways: true
 };
 
 describe('value objects', () => {
