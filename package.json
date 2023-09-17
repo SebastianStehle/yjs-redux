@@ -20,22 +20,42 @@
   "version": "0.2.0",
   "files": [
     "dist",
-    "src"
+    "lib"
   ],
-  "engines": {
-    "node": ">=10"
-  },
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc --project tsconfig.lib.json",
+    "build:sample": "tsc && vite build",
+    "dev": "vite",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test": "vitest --browser",
+    "test:ci": "vitest run --browser.name=chromium --browser.provider=playwright --browser.headless",
+    "preview": "vite preview"
   },
   "dependencies": {
     "redux": "^4.2.1",
     "yjs": "^13.6.7"
   },
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^9.0.0",
-    "@types/jest": "^29.5.5",
-    "tslib": "^2.6.2",
-    "typescript": "^5.2.2"
+    "@reduxjs/toolkit": "^1.9.5",
+    "@types/react-dom": "^18.2.7",
+    "@types/react": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.3",
+    "@vitest/browser": "^0.34.4",
+    "bootstrap": "^5.3.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "eslint": "^8.45.0",
+    "playwright": "^1.38.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.2",
+    "react": "^18.2.0",
+    "reactstrap": "^9.2.0",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vitest": "^0.34.4",
+    "webdriverio": "^8.16.10",
+    "y-webrtc": "^10.2.5"
   }
 }

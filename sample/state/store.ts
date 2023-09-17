@@ -4,7 +4,7 @@ import * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 import { Root, TaskItem, TaskList } from './state';
 import tasksReducer from './reducer';
-import { bind, SyncOptions } from './../../../src';
+import { bind, SyncOptions } from './../../lib';
 import { ImmutableList, ImmutableMap, ImmutableSet } from './../immutability';
 import ImmutableObjectResolver from './../immutability/immutable-object-resolver';
 import ImmutableListResolver from './../immutability/immutable-list-resolver';

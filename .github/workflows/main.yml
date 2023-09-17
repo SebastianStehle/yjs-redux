@@ -18,25 +18,17 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-
-      - name: Install Example
-        working-directory: ./example
+          
+      - name: Install Dependencies
         run: npm i
 
       - name: Install Playwright Browsers
-        working-directory: ./example
         run: npx playwright install --with-deps
 
       - name: Run Tests
-        working-directory: ./example
         run: npm run test:ci
           
-      - name: Install Dependencies
-        working-directory: ./
-        run: npm i
-          
       - name: Build Library
-        working-directory: ./
         run: npm run build
 
       - name: Publish to npm

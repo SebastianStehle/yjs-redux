@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { syncToYJS, SourceObject, SyncOptions, ValueResolver, DefaultSyncOptions } from './../../src';
+import { syncToYJS, SourceObject, SyncOptions, ValueResolver, DefaultSyncOptions } from './../lib';
 import { testInitialSync } from './test-utils';
 
 class Color {

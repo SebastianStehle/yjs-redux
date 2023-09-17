@@ -9,7 +9,6 @@ import { SourceArray, SourceObject, SyncOptions } from './sync-utils';
 import { isArray, isObject } from './utils';
 
 function valueToYJS(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
-    console.log('FOrraaO');
     if (!source) {
         return source;
     }

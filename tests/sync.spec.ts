@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { DefaultSyncOptions, SyncOptions, syncToYJS } from './../../src';
+import { DefaultSyncOptions, SyncOptions, syncToYJS } from './../lib';
 import { testInitialSync } from './test-utils';
 
 const options: SyncOptions = {

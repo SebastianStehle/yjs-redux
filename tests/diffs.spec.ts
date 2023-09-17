@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyArrayDiffs, applyObjectDiffs, calculateArrayDiffs, calculateObjectDiffs } from './../../src/diffs';
+import { applyArrayDiffs, applyObjectDiffs, calculateArrayDiffs, calculateObjectDiffs } from './../lib/diffs';
 
 describe('Arrays', () => {
     it('should return no diffs from empty arrays', () => {

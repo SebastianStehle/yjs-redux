@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import { SyncOptions, initToYJS, syncFromYJS } from './../../src';
+import { SyncOptions, initToYJS, syncFromYJS } from './../lib';
 
 export function testInitialSync(initial: () => any, update: (root: Y.AbstractType<any>, prev: any) => void, options: SyncOptions) {
     const doc1 = new Y.Doc();

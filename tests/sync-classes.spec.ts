@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { isArray, isString } from './../../src/utils';
-import { ArrayDiff, ArrayTypeResolver, DefaultSyncOptions, ObjectDiff, ObjectTypeResolver, SourceArray, SourceObject, SyncOptions, syncToYJS, TypeProperties } from './../../src';
+import { isArray, isString } from './../lib/utils';
+import { ArrayDiff, ArrayTypeResolver, DefaultSyncOptions, ObjectDiff, ObjectTypeResolver, SourceArray, SourceObject, SyncOptions, syncToYJS, TypeProperties } from './../lib';
 import { testInitialSync } from './test-utils';
 
 let id = 0;
