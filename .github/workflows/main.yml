@@ -19,12 +19,13 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
       - name: Install Example
         working-directory: ./example
         run: npm i
+
+      - name: Install Playwright Browsers
+        working-directory: ./example
+        run: npx playwright install --with-deps
 
       - name: Run Tests
         working-directory: ./example
@@ -35,5 +36,5 @@ jobs:
         run: npm i
           
       - name: Build Library
-        working-directory: ./exampe
+        working-directory: ./
         run: npm run build
