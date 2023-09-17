@@ -1,5 +1,8 @@
 # Redux Binding for YJS
 
+[![npm shield](https://img.shields.io/npm/v/yjs-redux)](https://www.npmjs.com/package/yjs-redux)
+
+
 Connects a redux store to yjs (https://docs.yjs.dev/) with support for all kind of javascript objects, including custom classes.
 
 ## Install
