@@ -1,23 +1,17 @@
 name: CI
+
 on: [push]
+
 jobs:
   build:
-    name: Build on Node ${{ matrix.node }} and ${{ matrix.os }}
-
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        node: ['18.x']
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Use Node ${{ matrix.node }}
+      - name: Setup node
         uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
           
       - name: Install Dependencies
         run: npm i
@@ -38,3 +32,4 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
