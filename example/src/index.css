@@ -1,0 +1,53 @@
+body {
+  background: #fcfcfc;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.lists {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  padding: 5px;
+  position: fixed;
+  height: 100vh;
+}
+
+.list, .list-add {
+  margin-bottom: 0;
+  margin-right: 10px;
+  max-height: 100%;
+  width: 300px;
+}
+
+.list-add.card {
+  border-style: dotted;
+}
+
+.list-add > .card-body {
+  text-align: center;
+}
+
+.list-add button {
+  margin-top: 100px;
+}
+
+.list:last-child {
+  margin: 0;
+}
+
+.list > .card-body {
+  background-color: #fcfcfc;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.task {
+  margin-bottom: 8px;
+}
+
+.task:last-child {
+  margin: 0;
+}
