@@ -3,7 +3,7 @@
 [![npm shield](https://img.shields.io/npm/v/yjs-redux)](https://www.npmjs.com/package/yjs-redux)
 
 
-Connects a redux store to yjs (https://docs.yjs.dev/) with support for all kind of javascript objects, including custom classes.
+Connects a redux store to yjs (https://docs.yjs.dev/) with support for all kind of JavaScript objects, including custom classes. Allows you to use the synchronization features of Yjs with the data management capabilities of redux. It works with any redux store, whether you use redux toolkit or not, and even supports initial values. Only transmits the changed values and keeps the number of changes in redux low.
 
 ## Install
 
