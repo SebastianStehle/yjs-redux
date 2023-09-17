@@ -1,160 +1,219 @@
-# TSDX React User Guide
+# Redux Binding for YJS
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+Connects a redux store to yjs (https://docs.yjs.dev/) with support for all kind of javascript objects, including custom classes.
 
-> This TSDX setup is meant for developing React component libraries (not apps!) that can be published to NPM. If you’re looking to build a React-based app, you should use `create-react-app`, `razzle`, `nextjs`, `gatsby`, or `react-static`.
+## Install
 
-> If you’re new to TypeScript and React, checkout [this handy cheatsheet](https://github.com/sw-yx/react-typescript-cheatsheet/)
-
-## Commands
-
-TSDX scaffolds your new library inside `/src`, and also sets up a [Parcel-based](https://parceljs.org) playground for it inside `/example`.
-
-The recommended workflow is to run TSDX in one terminal:
-
-```bash
-npm start # or yarn start
+```
+npm i yjs-redux
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+## General Usage
 
-Then run the example inside another:
+```ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as Y from 'yjs';
+import { WebrtcProvider } from 'y-webrtc';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { bind, SyncOptions } from 'yjs-redux';
 
-```bash
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
+const ydoc = new Y.Doc();
+
+new WebrtcProvider('demo-room', ydoc);
+
+const options: SyncOptions = {
+    typeResolvers: {},
+    valueResolvers: {},
+    syncAlways: true // Also sync arrays and objects.
+};
+
+// Call this for every slice you want to synchronize.
+const binder = bind(ydoc, 'tasks', options);
+
+export const store = configureStore({
+    reducer: binder.enhanceReducer(combineReducers({
+        ... YOUR REDUCERS
+    })),
+    middleware: [binder.middleware()]
+});
+
+export type RootState = ReturnType<typeof store.getState>;
 ```
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure TSDX is running in watch mode like we recommend above. **No symlinking required**, we use [Parcel's aliasing](https://parceljs.org/module_resolution.html#aliases).
+## Features
 
-To do a one-off build, use `npm run build` or `yarn build`.
+### Reduces changes
 
-To run tests, use `npm test` or `yarn test`.
+This implementation keeps the changes low and only synchronizes the minimum amount of changes as they have happened in the redx store. Changes are only applied when the object has been changed. This guarantees best performance for react equality checks and for writing selectors.
 
-## Configuration
+### Custom Type system
 
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
+By default we distinguish between custom types, that have the following properties:
 
-### Jest
+* `__typeName`: Unique type name within your redux store.
+* `__instanceId`: Globally unique ID for an object and updated versions of the same object.
 
-Jest tests are set up to run with `npm test` or `yarn test`.
+Only when the type name is present values are either mapped to `Y.Array` or `Y.Map` instances. This guarantees that values that should be treated as atomar values are not updated partially. Consider an object position with an **x** and **y** property. If we would map this property to a map and two users would move an object simultanously, we could end up with an position that is a combination of both updates.
 
-### Bundle analysis
+If you want to map all values you can set the `syncAlways` property to `true`.
 
-Calculates the real cost of your library using [size-limit](https://github.com/ai/size-limit) with `npm run size` and visulize it with `npm run analyze`.
+### Insert and Removal detection
 
-#### Setup Files
+Inserts to an array are automatically detected. This keeps the number of changes low and improves the network performance and the reduces the number of updates in your components or selectors.
 
-This is the folder structure we set up for you:
+### Support for custom value types
 
-```txt
-/example
-  index.html
-  index.tsx       # test your component here in a demo app
-  package.json
-  tsconfig.json
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
+If you have implemented custom value types like vectors, colors and so on as classes, you can implement the `ValueResolver` interface to support the serialization of these values.
+
+```ts
+import { ValueResolver } from 'yjs-redux';
+
+class Color {
+    public readonly __typeName = Color.TYPE_NAME;
+
+    public static readonly TYPE_NAME = 'Color';
+
+    public constructor(
+        public readonly value: string
+    ) {
+    }
+}
+
+class ColorValueResolver implements ValueResolver<Color> {
+    public static readonly INSTANCE = new ColorValueResolver();
+
+    private constructor() {
+    }
+
+    public fromYJS(source: SourceObject): Color {
+        return new Color(source['value'] as string);
+    }
+
+    public fromValue(source: Color): Readonly<{ [key: string]: unknown; }> {
+        return { value: source.value };
+    }
+}
+
+const options: SyncOptions = {
+    typeResolvers: {
+    },
+    valueResolvers: {
+        [Color.TYPE_NAME]: ColorValueResolver.INSTANCE
+    },
+    syncAlways: true
+};
 ```
 
-#### React Testing Library
+### Support for custom classes
 
-We do not set up `react-testing-library` for you yet, we welcome contributions and documentation on this.
+Classes that are not handled as value types and can be updated partially can also be mapped to yjs if you implement one of the following interfaces:
 
-### Rollup
+* `ArrayTypeResolver`: If your type should be mapped to `Y.Array` instance.
+* `ObjectTypeResolver`: If you type should be mapped to `Y.Map` instance.
 
-TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
+For example we can implement custom immutable class like this:
 
-### TypeScript
+```ts
+import { ObjectDiff, ObjectTypeResolver, SourceObject } from 'yjs-redux';
 
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
+class ImmutableArray<T> {
+    public readonly __typeName = ImmutableArray.TYPE_NAME;
 
-## Continuous Integration
+    public static readonly TYPE_NAME = 'ImmutableArray';
 
-### GitHub Actions
+    constructor(
+        public readonly __instanceId: string,
+        public readonly __generation: number,
+        public readonly items: ReadonlyArray<T>,
+    ) {
+    }
+}
 
-Two actions are added by default:
+class ImmutableArrayResolver<T> implements ArrayTypeResolver<ImmutableArray<T>> {
+    public readonly sourceType = 'Array';
 
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
+    public static readonly INSTANCE = new ImmutableArrayResolver();
 
-## Optimizations
+    private constructor() {
+    }
 
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
+    public create(source: SourceArray): ImmutableArray<T> {
+        return new ImmutableArray<T>(idGenerator(), 0, source as T[],);
+    }
 
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
+    public syncToYJS(value: ImmutableArray<T>): SourceArray {
+        return value.items;
+    }
 
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
+    public syncToObject(existing: ImmutableArray<T>, diffs: ArrayDiff[]): ImmutableArray<T> {
+        const newItems = [...existing.items];
+
+        for (const diff of diffs) {
+            if (diff.type === 'Set') {
+                newItems[diff.index] = diff.value as T;
+            } else if (diff.type === 'Insert') {
+                newItems.splice(diff.index, 0, diff.value as T);
+            } else {
+                newItems.splice(diff.index, 1);
+            }
+        }
+
+        return new ImmutableArray<T>(existing.__instanceId, existing.__generation + 1, newItems);
+    }
 }
 ```
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
+## Contributing
 
-## Module Formats
+Contributions are very welcome. Just go to the example folder and run:
 
-CJS, ESModules, and UMD module formats are supported.
-
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
-
-## Deploying the Example Playground
-
-The Playground is just a simple [Parcel](https://parceljs.org) app, you can deploy it anywhere you would normally deploy that. Here are some guidelines for **manually** deploying with the Netlify CLI (`npm i -g netlify-cli`):
-
-```bash
-cd example # if not already in the example folder
-npm run build # builds to dist
-netlify deploy # deploy the dist folder
+```
+npm i
+npm run test
+// OR
+npm run dev
 ```
 
-Alternatively, if you already have a git repo connected, you can set up continuous deployment with Netlify:
+We use vite for the example and therefore it was easy to integrate vitest into the project for running the tests. Therefore the tests are in the example folder for now.
 
-```bash
-netlify init
-# build command: yarn build && cd example && yarn && yarn build
-# directory to deploy: example/dist
-# pick yes for netlify.toml
+## How it works
+
+### Sync from Redux to YJS
+
+To synchronize from redux to yjs we compare the current and the previous state and compare the value. Because of the immutable nature of redux you can usually skip large parts of the state tree, that have not been changed. Then we basically do one of the following operations:
+
+* Set a map value.
+* Remove an map key.
+* Push an item to an array.
+* Remove an item from an array.
+* Create new yjs structures when new state is created.
+
+Whenever we create a yjs we also define where this object. We create a bidirectional mappign with the following properties.
+
+* `yjs[__source] = state` to define the synchronization source from a yjs type. We can use that to resolve the state object from a yjs instance.
+* `state[__target] = yjs` to define the synchronization yjs type for a state object. We can use that to resolve the yjs type from a state object.
+
+### Sync from YJS
+ 
+We use the events from synchronize from yjs to states. Because of the immutable nature of redux, we always have to update all parents if we update one of the ancestores. Therefore we use the following flow:
+
+* From and event target (the yjs type) we resolve the source state object.
+* We mark the state object as **invalid** and attach the event to the state object.
+* We loop to the root object using the `parent` property of the yjs type to also navigate to the state root and also mark all items as invalid, that need to be changed.
+
+Lets assume we have the following state and that we receive and update for the paragraph. This would create the following metadata.
+
+```
+root [__invalid: true]
+   pages [__invalid: true]
+      page [__invalid: true]
+         paragraphs [__invalid: true]
+            paragraph [__invalid: true, event]
+      page
+         paragraphs
+            paragraph
+   images
+      image
 ```
 
-## Named Exports
-
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
-
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using [np](https://github.com/sindresorhus/np).
-
-## Usage with Lerna
-
-When creating a new package with TSDX within a project set up with Lerna, you might encounter a `Cannot resolve dependency` error when trying to run the `example` project. To fix that you will need to make changes to the `package.json` file _inside the `example` directory_.
-
-The problem is that due to the nature of how dependencies are installed in Lerna projects, the aliases in the example project's `package.json` might not point to the right place, as those dependencies might have been installed in the root of your Lerna project.
-
-Change the `alias` to point to where those packages are actually installed. This depends on the directory structure of your Lerna project, so the actual path might be different from the diff below.
-
-```diff
-   "alias": {
--    "react": "../node_modules/react",
--    "react-dom": "../node_modules/react-dom"
-+    "react": "../../../node_modules/react",
-+    "react-dom": "../../../node_modules/react-dom"
-   },
-```
-
-An alternative to fixing this problem would be to remove aliases altogether and define the dependencies referenced as aliases as dev dependencies instead. [However, that might cause other problems.](https://github.com/palmerhq/tsdx/issues/64)
+Now we have to loop from root to the children and update all state objects using a depth first search.
