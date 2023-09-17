@@ -1,11 +1,23 @@
 {
   "name": "yjs-redux",
-  "author": "Sebastian",
+  "author": "Sebastian Stehle",
+  "keywords": [
+    "collaboration",
+    "crdt",
+    "react",
+    "redux",
+    "typescript"
+  ],
+  "homepage": "https://github.com/SebastianStehle/yjs-redux#Readme.md",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/yjs-redux.esm.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SebastianStehle/yjs-redux"
+  },
   "typings": "dist/index.d.ts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "files": [
     "dist",
     "src"
