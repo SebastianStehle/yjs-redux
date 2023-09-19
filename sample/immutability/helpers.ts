@@ -1,5 +1,5 @@
 
-let id = 0;
+let id = new Date().getTime();
 export function idGenerator() {
     return `${id++}`;
 }

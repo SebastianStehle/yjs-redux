@@ -13,9 +13,9 @@ import ImmutableSetResolver from './../immutability/immutable-set-resolver';
 
 const ydoc = new Y.Doc();
 
-new WebrtcProvider('demo-room4', ydoc);
+export const provider = new WebrtcProvider('demo-room4', ydoc);
 
-const options: SyncOptions = {
+const options: Partial<SyncOptions> = {
     typeResolvers: {
         Root: ImmutableObjectResolver.create<Root>(values => {
             return new Root(values as any);
@@ -30,7 +30,6 @@ const options: SyncOptions = {
         [ImmutableMap.TYPE_NAME]: ImmutableMapResolver.INSTANCE,
         [ImmutableSet.TYPE_NAME]: ImmutableSetResolver.INSTANCE,
     },
-    valueResolvers: {}
 };
 
 const binder = bind(ydoc, 'tasks', options);
