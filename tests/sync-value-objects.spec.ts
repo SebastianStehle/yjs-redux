@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { syncToYJS, SourceObject, SyncOptions, ValueResolver, DefaultSyncOptions } from './../lib';
+import { syncToYjs, SourceObject, SyncOptions, ValueResolver, DefaultSyncOptions } from './../lib';
 import { testInitialSync } from './test-utils';
 
 class Color {
@@ -20,7 +20,7 @@ class ColorValueResolver implements ValueResolver<Color> {
     private constructor() {
     }
 
-    public fromYJS(source: SourceObject): Color {
+    public fromYjs(source: SourceObject): Color {
         return new Color(source['value'] as string);
     }
 
@@ -44,7 +44,7 @@ describe('value objects', () => {
             color: new Color('yellow'),
         };
     
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
     
         expect(result).toEqual(update);
         expect(result.color instanceof Color).toBeTruthy();
@@ -59,7 +59,7 @@ describe('value objects', () => {
             color: new Color('green'),
         };
     
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
     
         expect(result).toEqual(update);
         expect(result.color instanceof Color).toBeTruthy();

@@ -1,19 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import * as Y from 'yjs';
-import { WebrtcProvider } from 'y-webrtc';
 import { Root, TaskItem, TaskList } from './state';
 import tasksReducer from './reducer';
-import { bind, SyncOptions } from './../../lib';
+import { createYjsReduxBinder, SyncOptions } from './../../lib';
 import { ImmutableList, ImmutableMap, ImmutableSet } from './../immutability';
 import ImmutableObjectResolver from './../immutability/immutable-object-resolver';
 import ImmutableListResolver from './../immutability/immutable-list-resolver';
 import ImmutableMapResolver from './../immutability/immutable-map-resolver';
 import ImmutableSetResolver from './../immutability/immutable-set-resolver';
-
-const ydoc = new Y.Doc();
-
-export const provider = new WebrtcProvider('demo-room4', ydoc);
 
 const options: Partial<SyncOptions> = {
     typeResolvers: {
@@ -32,13 +26,13 @@ const options: Partial<SyncOptions> = {
     },
 };
 
-const binder = bind(ydoc, 'tasks', options);
+export const binder = createYjsReduxBinder(options);
 
 export const store = configureStore({
     reducer: binder.enhanceReducer(combineReducers({
         tasks: tasksReducer
     })),
-    middleware: [binder.middleware()]
+    middleware: [binder.middleware]
 });
 
 export type RootState = ReturnType<typeof store.getState>;

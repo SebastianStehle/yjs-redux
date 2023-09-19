@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ImmutableMap } from './immutable-map';
-import { ObjectDiff, ObjectTypeResolver, SourceObject } from './../../src';
+import { ObjectDiff, ObjectTypeResolver, SourceObject } from './../../lib';
 
 export default class ImmutableMapResolver implements ObjectTypeResolver<ImmutableMap<unknown>> {
     public readonly sourceType = 'Object';
@@ -14,7 +14,7 @@ export default class ImmutableMapResolver implements ObjectTypeResolver<Immutabl
         return ImmutableMap.of(source as any);
     }
 
-    public syncToYJS(value: ImmutableMap<unknown>): SourceObject {
+    public syncToYjs(value: ImmutableMap<unknown>): SourceObject {
         return value.raw;
     }
 

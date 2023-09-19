@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ImmutableList } from './immutable-list';
-import { ArrayDiff, ArrayTypeResolver, SourceArray } from './../../src';
+import { ArrayDiff, ArrayTypeResolver, SourceArray } from './../../lib';
 
 export default class ImmutableListResolver implements ArrayTypeResolver<ImmutableList<unknown>> {
     public readonly sourceType = 'Array';
@@ -14,7 +14,7 @@ export default class ImmutableListResolver implements ArrayTypeResolver<Immutabl
         return ImmutableList.of(source as any);
     }
 
-    public syncToYJS(value: ImmutableList<unknown>): SourceArray {
+    public syncToYjs(value: ImmutableList<unknown>): SourceArray {
         return value.raw;
     }
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import { SyncOptions, initToYJS, syncFromYJS } from './../lib';
+import { SyncOptions, initToYjs, syncFromYjs } from './../lib';
 
 export function testInitialSync(initial: () => any, update: (root: Y.AbstractType<any>, prev: any) => void, options: SyncOptions) {
     const doc1 = new Y.Doc();
@@ -17,15 +17,15 @@ export function testInitialSync(initial: () => any, update: (root: Y.AbstractTyp
     const initial1 = initial();
     const initial2 = initial();
 
-    const root1 = initToYJS(initial1, doc1, 'slice', options);
-    const root2 = initToYJS(initial2, doc2, 'slice', options);
+    const root1 = initToYjs(initial1, doc1, 'slice', options);
+    const root2 = initToYjs(initial2, doc2, 'slice', options);
 
     const state = {
         synced: initial2
     };
 
     root2.observeDeep((events: any) => {
-        state.synced = syncFromYJS(initial2, events, options);
+        state.synced = syncFromYjs(initial2, events, options);
     });
 
     doc1.transact(() => {

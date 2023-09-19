@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ImmutableObject } from './immutable-object';
-import { ObjectDiff, ObjectTypeResolver, SourceObject } from './../../src';
+import { ObjectDiff, ObjectTypeResolver, SourceObject } from './../../lib';
 
 export default class ImmutableObjectResolver<T extends ImmutableObject<any>> implements ObjectTypeResolver<T> {
     public readonly sourceType = 'Object';
@@ -18,7 +18,7 @@ export default class ImmutableObjectResolver<T extends ImmutableObject<any>> imp
         return this.factory(source);
     }
 
-    public syncToYJS(value: T): SourceObject {
+    public syncToYjs(value: T): SourceObject {
         return value.unsafeValues();
     }
 

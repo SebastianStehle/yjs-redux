@@ -84,7 +84,7 @@ function syncObject(source: Readonly<Record<string, object>>, event: Y.YEvent<an
 function syncTypedObject(source: any, event: Y.YEvent<any> | undefined, typeResolver: ObjectTypeResolver<any>, options: SyncOptions) {
     let diffs: ObjectDiff[] | undefined;
 
-    const sourceValue = typeResolver.syncToYJS(source);
+    const sourceValue = typeResolver.syncToYjs(source);
 
     // Because of immutability we have to check if there is a change down the path.
     for (const [key, valueOld] of Object.entries(sourceValue)) {
@@ -173,7 +173,7 @@ function syncArray(source: ReadonlyArray<unknown>, event: Y.YEvent<any> | undefi
 function syncTypedArray(source: any, event: Y.YEvent<any> | undefined, typeResolver: ArrayTypeResolver<any>, options: SyncOptions) {
     let diffs: ArrayDiff[] | undefined = undefined;
 
-    const sourceValue = typeResolver.syncToYJS(source);
+    const sourceValue = typeResolver.syncToYjs(source);
 
     // Because of immutability we have to check if there is a change down the path.
     for (let i = 0; i < sourceValue.length; i++) {
@@ -225,7 +225,7 @@ function syncTypedArray(source: any, event: Y.YEvent<any> | undefined, typeResol
     return source;
 }
 
-export function syncFromYJS<T>(source: T, events: ReadonlyArray<Y.YEvent<any>>, options: SyncOptions) {
+export function syncFromYjs<T>(source: T, events: ReadonlyArray<Y.YEvent<any>>, options: SyncOptions) {
     for (const event of events) {
         invalidate(event.target, event);
     }

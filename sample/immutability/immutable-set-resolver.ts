@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ImmutableSet } from './immutable-set';
-import { ObjectDiff, ObjectTypeResolver, SourceObject } from './../../src';
+import { ObjectDiff, ObjectTypeResolver, SourceObject } from './../../lib';
 
 export default class ImmutableSetResolver implements ObjectTypeResolver<ImmutableSet> {
     public readonly sourceType = 'Object';
@@ -16,7 +16,7 @@ export default class ImmutableSetResolver implements ObjectTypeResolver<Immutabl
         return ImmutableSet.of(source as any);
     }
 
-    public syncToYJS(value: ImmutableSet): SourceObject {
+    public syncToYjs(value: ImmutableSet): SourceObject {
         return value.raw;
     }
 

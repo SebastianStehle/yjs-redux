@@ -1,4 +1,4 @@
-# Redux Binding for YJS
+# Redux Binding for Yjs
 
 [![npm shield](https://img.shields.io/npm/v/yjs-redux)](https://www.npmjs.com/package/yjs-redux)
 
@@ -18,7 +18,7 @@ npm i yjs-redux
 import * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import { bind, SyncOptions } from 'yjs-redux';
+import { createBinder, SyncOptions } from 'yjs-redux';
 
 const ydoc = new Y.Doc();
 
@@ -31,7 +31,9 @@ const options: SyncOptions = {
 };
 
 // Call this for every slice you want to synchronize.
-const binder = bind(ydoc, 'tasks', options);
+const binder = createYjsReduxBinder(options);
+
+binder.connectSlice(doc);
 
 export const store = configureStore({
     reducer: binder.enhanceReducer(combineReducers({
@@ -88,7 +90,7 @@ class ColorValueResolver implements ValueResolver<Color> {
     private constructor() {
     }
 
-    public fromYJS(source: SourceObject): Color {
+    public fromYjs(source: SourceObject): Color {
         return new Color(source['value'] as string);
     }
 
@@ -141,7 +143,7 @@ class ImmutableArrayResolver<T> implements ArrayTypeResolver<ImmutableArray<T>> 
         return new ImmutableArray<T>(idGenerator(), 0, source as T[],);
     }
 
-    public syncToYJS(value: ImmutableArray<T>): SourceArray {
+    public syncToYjs(value: ImmutableArray<T>): SourceArray {
         return value.items;
     }
 
@@ -176,7 +178,7 @@ npm run dev
 
 ## How it works
 
-### Sync from Redux to YJS
+### Sync from Redux to Yjs
 
 To synchronize from redux to yjs we compare the current and the previous state and compare the value. Because of the immutable nature of redux you can usually skip large parts of the state tree, that have not been changed. Then we basically do one of the following operations:
 
@@ -191,7 +193,7 @@ Whenever we create a yjs we also define where this object. We create a bidirecti
 * `yjs[__source] = state` to define the synchronization source from a yjs type. We can use that to resolve the state object from a yjs instance.
 * `state[__target] = yjs` to define the synchronization yjs type for a state object. We can use that to resolve the yjs type from a state object.
 
-### Sync from YJS
+### Sync from Yjs
  
 We use the events from synchronize from yjs to states. Because of the immutable nature of redux, we always have to update all parents if we update one of the ancestores. Therefore we use the following flow:
 

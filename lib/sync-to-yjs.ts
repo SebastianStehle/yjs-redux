@@ -8,7 +8,7 @@ import { setSource } from './sync-internals';
 import { SourceArray, SourceObject, SyncOptions } from './sync-utils';
 import { isArray, isObject } from './utils';
 
-function valueToYJS(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
+function valueToYjs(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
     if (!source) {
         return source;
     }
@@ -18,11 +18,11 @@ function valueToYJS(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: 
     if (!typeName) {
         if (options.syncAlways) {
             if (isArray(source) && !options.isValueType(source)) {
-                return valueToYJSArray(source, source, [], options, doc, sliceName);
+                return valueToYjsArray(source, source, [], options, doc, sliceName);
             }
             
             if (isObject(source) && !options.isValueType(source)) {
-                return valueToYJSObject(source, source, {}, options, doc, sliceName);
+                return valueToYjsObject(source, source, {}, options, doc, sliceName);
             }
         }
 
@@ -50,17 +50,17 @@ function valueToYJS(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: 
             [TypeProperties.typeName]: typeName
         };
         
-        return valueToYJSObject(source, typeResolver.syncToYJS(source), initial, options, doc);
+        return valueToYjsObject(source, typeResolver.syncToYjs(source), initial, options, doc);
     } else {
         const initial: any[] = [
             { [TypeProperties.typeName]: typeName }
         ];
         
-        return valueToYJSArray(source, typeResolver.syncToYJS(source), initial, options, doc);
+        return valueToYjsArray(source, typeResolver.syncToYjs(source), initial, options, doc);
     }
 }
 
-function valueToYJSObject(source: any, values: SourceObject, initial: Record<string, object>, options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
+function valueToYjsObject(source: any, values: SourceObject, initial: Record<string, object>, options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
     let map: Y.Map<unknown>;
     if (doc) {
         map = doc.getMap(sliceName);
@@ -73,14 +73,14 @@ function valueToYJSObject(source: any, values: SourceObject, initial: Record<str
     }
 
     for (const [key, value] of Object.entries(values)) {
-        map.set(key, valueToYJS(value, options));
+        map.set(key, valueToYjs(value, options));
     }
 
     setSource(map, source);
     return map;
 }
 
-function valueToYJSArray(source: any, values: SourceArray, initial: any[], options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
+function valueToYjsArray(source: any, values: SourceArray, initial: any[], options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
     let array: Y.Array<unknown>;
     if (doc) {
         array = doc.getArray(sliceName);
@@ -89,7 +89,7 @@ function valueToYJSArray(source: any, values: SourceArray, initial: any[], optio
     }
 
     array.push(initial);
-    array.push(values.map(v => valueToYJS(v, options)));
+    array.push(values.map(v => valueToYjs(v, options)));
 
     setSource(array, source);
     return array;
@@ -137,8 +137,8 @@ function diffObjects(current: any, previous: any, target: Y.Map<any>, options: S
         throw new Error(`Cannot find type resolver for '${typeName}'.`);
     }
     
-    const objCurrent = typeResolver.syncToYJS(current);
-    const objPrevious = typeResolver.syncToYJS(previous);
+    const objCurrent = typeResolver.syncToYjs(current);
+    const objPrevious = typeResolver.syncToYjs(previous);
 
     diffObjectsCore(objCurrent, objPrevious, target, options);
     return true;
@@ -153,9 +153,9 @@ function diffObjectsCore(current: SourceObject, previous: SourceObject, target: 
         if (diff.type === 'Remove') {
             target.delete(key);
         } else if (diff.type === 'Add') {
-            target.set(key, valueToYJS(diff.value, options));
+            target.set(key, valueToYjs(diff.value, options));
         } else if (!diffValues(diff.value, diff.oldValue, target.get(diff.key), options)) {
-            target.set(key, valueToYJS(diff.value, options));
+            target.set(key, valueToYjs(diff.value, options));
         }
     }
 }
@@ -188,8 +188,8 @@ function diffArrays(current: any, previous: any, target: Y.Array<any>, options: 
         throw new Error(`Cannot find type resolver for '${typeName}'.`);
     }
     
-    const arrayCurrent = typeResolver.syncToYJS(current);
-    const arrayPrevious = typeResolver.syncToYJS(previous);
+    const arrayCurrent = typeResolver.syncToYjs(current);
+    const arrayPrevious = typeResolver.syncToYjs(previous);
 
     diffArraysCore(arrayCurrent, arrayPrevious, target, 1, options);
     return true;
@@ -204,20 +204,20 @@ function diffArraysCore(current: SourceArray, previous: SourceArray, target: Y.A
         if (diff.type === 'Remove') {
             target.delete(index, diff.count);
         } else if (diff.type === 'Insert') {
-            target.insert(index, diff.values.map(v => valueToYJS(v, options)));
+            target.insert(index, diff.values.map(v => valueToYjs(v, options)));
         } else if (!diffValues(diff.value, diff.oldValue, target.get(diff.oldIndex + indexOffset), options)) {
             target.delete(index, 1);
-            target.insert(index, [valueToYJS(diff.value, options)]);
+            target.insert(index, [valueToYjs(diff.value, options)]);
         }
     }
 }
 
-export function syncToYJS(current: any, previous: any, target: Y.AbstractType<any>, options: SyncOptions) {
+export function syncToYjs(current: any, previous: any, target: Y.AbstractType<any>, options: SyncOptions) {
     diffValues(current, previous, target, options);
 }
 
-export function initToYJS(current: any, doc: Y.Doc, sliceName: string | undefined, options: SyncOptions) {
-    const result = valueToYJS(current, options, doc, sliceName);
+export function initToYjs(current: any, doc: Y.Doc, sliceName: string | undefined, options: SyncOptions) {
+    const result = valueToYjs(current, options, doc, sliceName);
 
     if (!(result instanceof Y.Array) && !(result instanceof Y.Map)) {
         throw new Error('Root object must map to a yjs object.');

@@ -55,7 +55,7 @@ export function yjsToValue(source: any, options: SyncOptions) {
         // Delete the type name, because it was not part of the object that has been created when syncing to yjs.
         delete source[TypeProperties.typeName];
 
-        return valueResolver.fromYJS(source);
+        return valueResolver.fromYjs(source);
     }
 
     return result;

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
 import { isArray, isString } from './../lib/utils';
-import { ArrayDiff, ArrayTypeResolver, DefaultSyncOptions, ObjectDiff, ObjectTypeResolver, SourceArray, SourceObject, SyncOptions, syncToYJS, TypeProperties } from './../lib';
+import { ArrayDiff, ArrayTypeResolver, DefaultSyncOptions, ObjectDiff, ObjectTypeResolver, SourceArray, SourceObject, SyncOptions, syncToYjs, TypeProperties } from './../lib';
 import { testInitialSync } from './test-utils';
 
 let id = 0;
@@ -47,7 +47,7 @@ class ImmutableArrayResolver<T> implements ArrayTypeResolver<ImmutableArray<T>> 
         return new ImmutableArray<T>(idGenerator(), 0, source as T[],);
     }
 
-    public syncToYJS(value: ImmutableArray<T>): SourceArray {
+    public syncToYjs(value: ImmutableArray<T>): SourceArray {
         return value.items;
     }
 
@@ -80,7 +80,7 @@ class ImmutableObjectResolver<T> implements ObjectTypeResolver<ImmutableObject<T
         return new ImmutableObject<T>(idGenerator(), 0, source as Record<string, any>);
     }
 
-    public syncToYJS(value: ImmutableObject<T>): SourceObject {
+    public syncToYjs(value: ImmutableObject<T>): SourceObject {
         return value.values;
     }
 
@@ -115,7 +115,7 @@ describe('Redux classes', () => {
             11,
         ]);
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });
@@ -130,7 +130,7 @@ describe('Redux classes', () => {
             12,
         ]);
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });
@@ -151,7 +151,7 @@ describe('Redux classes', () => {
             ])
         });
     
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
     
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });
@@ -163,7 +163,7 @@ describe('Redux classes', () => {
             newKey: 'Hello Redux'
         });
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });
@@ -179,7 +179,7 @@ describe('Redux classes', () => {
             13,
         ]);
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });
@@ -192,7 +192,7 @@ describe('Redux classes', () => {
         const update = new ImmutableObject('1', 1, {
         });
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });
@@ -203,10 +203,10 @@ describe('Redux classes', () => {
         });
 
         const update = new ImmutableObject('1', 1, {
-            updatedKey: 'Hello YJS'
+            updatedKey: 'Hello Yjs'
         });
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });
@@ -224,7 +224,7 @@ describe('Redux classes', () => {
             13
         ]);
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });
@@ -256,7 +256,7 @@ describe('Redux classes', () => {
                 new ImmutableObject('3', 1, {
                     nested1_1: new ImmutableArray('4', 1, [
                         new ImmutableObject('5', 2, {
-                            nested1_1_1: 'Hello YJS'
+                            nested1_1_1: 'Hello Yjs'
                         }),
                     ]),
                 }),
@@ -272,7 +272,7 @@ describe('Redux classes', () => {
             ])
         });
     
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
     
         expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
     });

@@ -119,7 +119,7 @@ export class ColorValueResolver implements ValueResolver<Color> {
     private constructor() {
     }
 
-    public fromYJS(source: SourceObject): Color {
+    public fromYjs(source: SourceObject): Color {
         return new Color(source['value'] as string);
     }
 

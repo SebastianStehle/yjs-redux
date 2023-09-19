@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function isArray(value: any): value is ReadonlyArray<any> {
     return Array.isArray(value);
 }

@@ -48,7 +48,7 @@ export type SourceArray = ReadonlyArray<unknown>;
 export interface TypeResolver<T, TSource, TDiff> {
     create(source: TSource): T;
 
-    syncToYJS(value: T): TSource;
+    syncToYjs(value: T): TSource;
 
     syncToObject(existing: T, diffs: TDiff[]): T;
 }
@@ -62,7 +62,7 @@ export interface ArrayTypeResolver<T> extends TypeResolver<T, SourceArray, Array
 }
 
 export interface ValueResolver<T> {
-    fromYJS(source: SourceObject): T;
+    fromYjs(source: SourceObject): T;
 
     fromValue(source: T): Record<string, unknown>;
 }

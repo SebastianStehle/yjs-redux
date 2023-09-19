@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { DefaultSyncOptions, SyncOptions, syncToYJS } from './../lib';
+import { DefaultSyncOptions, SyncOptions, syncToYjs } from './../lib';
 import { testInitialSync } from './test-utils';
 
 const options: SyncOptions = {
@@ -18,7 +18,7 @@ describe('Redux objects', () => {
             12,
         ];
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(result).toEqual(update);
     });
@@ -30,7 +30,7 @@ describe('Redux objects', () => {
             11,
         ];
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(result).toEqual(update);
     });
@@ -50,7 +50,7 @@ describe('Redux objects', () => {
             ]
         };
     
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
     
         expect(result).toEqual(update);
     });
@@ -62,7 +62,7 @@ describe('Redux objects', () => {
             newKey: 'Hello Redux'
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(result).toEqual(update);
     });
@@ -78,7 +78,7 @@ describe('Redux objects', () => {
             13,
         ];
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(result).toEqual(update);
     });
@@ -91,7 +91,7 @@ describe('Redux objects', () => {
         const update = {
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(result).toEqual(update);
     });
@@ -102,10 +102,10 @@ describe('Redux objects', () => {
         });
 
         const update = {
-            updatedKey: 'Hello YJS'
+            updatedKey: 'Hello Yjs'
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(result).toEqual(update);
     });
@@ -123,7 +123,7 @@ describe('Redux objects', () => {
             33
         ];
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
 
         expect(result).toEqual(update);
     });
@@ -144,7 +144,7 @@ describe('Redux objects', () => {
             }
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, actualOptions), actualOptions);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, actualOptions), actualOptions);
 
         expect(result).toEqual(update);
     });
@@ -176,7 +176,7 @@ describe('Redux objects', () => {
                 {
                     nested1_1: [
                         {
-                            nested1_1_1: 'Hello YJS'
+                            nested1_1_1: 'Hello Yjs'
                         }
                     ]
                 }
@@ -185,14 +185,14 @@ describe('Redux objects', () => {
                 {
                     nested2_1: [
                         {
-                            nested2_1_1: 'Hello YJS'
+                            nested2_1_1: 'Hello Yjs'
                         }
                     ]
                 }
             ]
         };
     
-        const result = testInitialSync(initial, (root, prev) => syncToYJS(update, prev, root, options), options);
+        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
     
         expect(result).toEqual(update);
     });
