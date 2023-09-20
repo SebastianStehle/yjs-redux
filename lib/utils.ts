@@ -15,3 +15,7 @@ export function isString(value: any): value is string {
 export function isFunction(value: any): value is Function {
     return typeof value === 'function';
 }
+
+export function logException(e: any) {
+    (console.error || console.log).call(console, e.stack || e);
+}

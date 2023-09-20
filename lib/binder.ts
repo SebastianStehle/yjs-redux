@@ -4,7 +4,7 @@ import { Middleware, MiddlewareAPI, Reducer } from 'redux';
 import { initToYjs, syncToYjs } from './sync-to-yjs';
 import { syncFromYjs } from './sync-from-yjs';
 import { DefaultSyncOptions, SyncOptions } from './sync-utils';
-import { isFunction, isObject } from './utils';
+import { isFunction, isObject, logException } from './utils';
 
 const SYNC_TYPE = 'SYNC_FROM_JS';
 
@@ -20,7 +20,7 @@ export type Binder = {
     middleware: Middleware;
 
     // Connects one part of the state to the document and returns a function to disconnect.
-    connectSlice: (doc: Y.Doc, sliceName?: string) => () => void;
+    connectSlice: (doc: Y.Doc, sliceName?: string, onRootCreated?: (root: Y.Map<unknown> | Y.Array<unknown>) => void) => () => void;
 };
 
 export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
@@ -89,7 +89,7 @@ export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
         return reducer;
     };
 
-    const connectSlice = (doc: Y.Doc, sliceName: string | undefined) => {
+    const connectSlice = (doc: Y.Doc, sliceName: string | undefined, onRootCreated?: (root: Y.Map<unknown> | Y.Array<unknown>) => void) => {
         const actualSliceName = sliceName || '';
 
         if (synchronizers[actualSliceName]) {
@@ -97,7 +97,7 @@ export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
             return () => {};
         }
     
-        const synchronizer = new SliceSynchonizer(doc, actualOptions, actualSliceName);
+        const synchronizer = new SliceSynchonizer(doc, actualOptions, actualSliceName, onRootCreated);
 
         synchronizers[actualSliceName] = synchronizer;
 
@@ -116,13 +116,15 @@ export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
 }
 
 class SliceSynchonizer {
+    private isSyncTransactionRunning = false;
     private disconnectHandler?: () => void;
-    private root: Y.AbstractType<any> | null = null;
+    private root: Y.Map<any> | Y.Array<any> | null = null;
 
     constructor(
-        public readonly doc: Y.Doc,
-        public readonly options: SyncOptions,
-        public readonly sliceName: string,
+        private readonly doc: Y.Doc,
+        private readonly options: SyncOptions,
+        private readonly sliceName: string,
+        private readonly onRootCreated: ((root: Y.Map<unknown> | Y.Array<unknown>) => void) | undefined
     ) {
     }
 
@@ -140,7 +142,7 @@ class SliceSynchonizer {
             return;
         }
 
-        this.doc.transact(() => {
+        this.transact(() => {
             syncToYjs(sliceCurrent, slicePrevious, root, this.options);
         });
     }
@@ -154,10 +156,14 @@ class SliceSynchonizer {
             // Connect has already been called.
             return;
         }
+
+        const sliceName = this.sliceName;
             
-        this.doc.transact(() => {
+        this.transact(() => {
             // Make an initial synchronization which also creates the root type.
-            this.root = initToYjs(getState(store, this.sliceName), this.doc, this.sliceName, this.options);
+            this.root = initToYjs(getState(store, sliceName), this.doc, sliceName, this.options);
+            
+            this.onRootCreated?.(this.root);
         });
 
         const root = this.root!;
@@ -167,17 +173,23 @@ class SliceSynchonizer {
             throw new Error('Initial synchronization returns not root object.');
         }
     
-        const observerFunction = (events: Y.YEvent<any>[], transaction: Y.Transaction) => {
-            if (transaction.local) {
+        const observerFunction = (events: Y.YEvent<any>[]) => {
+            if (this.isSyncTransactionRunning) {
                 return;
             }
     
-            const stateOld = getState(store, this.sliceName);
-            const stateNew = syncFromYjs<any>(stateOld, events, this.options);
-    
-            if (stateOld !== stateNew) {
-                store.dispatch(syncAction({ value: stateNew, sliceName: this.sliceName }));
-            }   
+            try {
+                const stateOld = getState(store, sliceName);
+                const stateNew = syncFromYjs<any>(stateOld, events, this.options);
+        
+                if (stateOld !== stateNew) {
+                    store.dispatch(syncAction({ value: stateNew, sliceName: sliceName }));
+                }
+            } catch (e) {
+                // This exception is sometimes swallowed, therefore we need to log it.
+                logException(e);
+                throw e;
+            }
         };
     
         root.observeDeep(observerFunction);
@@ -185,6 +197,24 @@ class SliceSynchonizer {
         this.disconnectHandler = () => {
             root.unobserveDeep(observerFunction);
         };
+    }
+
+    private transact(handler: () => void) {
+        this.isSyncTransactionRunning = true;
+        try {
+            this.doc.transact(() => {
+                try {
+                    handler();
+                } catch (e) {
+                    // This exception is sometimes swallowed, therefore we need to log it.
+                    logException(e);
+                    throw e;
+                }
+            });
+        }
+        finally {
+            this.isSyncTransactionRunning = false;
+        }
     }
 }
 

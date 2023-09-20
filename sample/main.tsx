@@ -9,11 +9,9 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <Provider store={store}>
-            <YjsReduxBinderProvider binder={binder}>
-                <App />
-            </YjsReduxBinderProvider>
-        </Provider>
-    </React.StrictMode>,
+    <Provider store={store}>
+        <YjsReduxBinderProvider binder={binder}>
+            <App />
+        </YjsReduxBinderProvider>
+    </Provider>
 );

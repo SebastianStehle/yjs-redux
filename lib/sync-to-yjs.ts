@@ -114,7 +114,7 @@ function diffObjects(current: any, previous: any, target: Y.Map<any>, options: S
 
     if (!typeName) {
         if (options.syncAlways && isObject(current) && isObject(previous)) {
-            diffObjectsCore(current, previous, target, options);
+            diffObjectsCore(current, previous, current, target, options);
             return true;
         }
 
@@ -140,11 +140,11 @@ function diffObjects(current: any, previous: any, target: Y.Map<any>, options: S
     const objCurrent = typeResolver.syncToYjs(current);
     const objPrevious = typeResolver.syncToYjs(previous);
 
-    diffObjectsCore(objCurrent, objPrevious, target, options);
+    diffObjectsCore(objCurrent, objPrevious, current, target, options);
     return true;
 }
 
-function diffObjectsCore(current: SourceObject, previous: SourceObject, target: Y.Map<any>, options: SyncOptions) {
+function diffObjectsCore(current: SourceObject, previous: SourceObject, source: any, target: Y.Map<any>, options: SyncOptions) {
     const diffs = calculateObjectDiffs(current, previous);
 
     for (const diff of diffs) {
@@ -158,6 +158,8 @@ function diffObjectsCore(current: SourceObject, previous: SourceObject, target: 
             target.set(key, valueToYjs(diff.value, options));
         }
     }
+
+    setSource(target, source);
 }
 
 function diffArrays(current: any, previous: any, target: Y.Array<any>, options: SyncOptions) {
@@ -165,7 +167,7 @@ function diffArrays(current: any, previous: any, target: Y.Array<any>, options: 
 
     if (!typeName) {
         if (options.syncAlways && isArray(current) && isArray(previous)) {
-            diffArraysCore(current, previous, target, 0, options);
+            diffArraysCore(current, previous, current, target, 0, options);
             return true;
         }
 
@@ -191,11 +193,11 @@ function diffArrays(current: any, previous: any, target: Y.Array<any>, options: 
     const arrayCurrent = typeResolver.syncToYjs(current);
     const arrayPrevious = typeResolver.syncToYjs(previous);
 
-    diffArraysCore(arrayCurrent, arrayPrevious, target, 1, options);
+    diffArraysCore(arrayCurrent, arrayPrevious, current, target, 1, options);
     return true;
 }
 
-function diffArraysCore(current: SourceArray, previous: SourceArray, target: Y.Array<any>, indexOffset: number, options: SyncOptions) {
+function diffArraysCore(current: SourceArray, previous: SourceArray, source: any, target: Y.Array<any>, indexOffset: number, options: SyncOptions) {
     const diffs = calculateArrayDiffs(current, previous);
 
     for (const diff of diffs) {
@@ -210,6 +212,7 @@ function diffArraysCore(current: SourceArray, previous: SourceArray, target: Y.A
             target.insert(index, [valueToYjs(diff.value, options)]);
         }
     }
+    setSource(target, source);
 }
 
 export function syncToYjs(current: any, previous: any, target: Y.AbstractType<any>, options: SyncOptions) {

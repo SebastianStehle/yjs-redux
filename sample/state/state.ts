@@ -6,6 +6,8 @@ interface RootProps {
 }
 
 export class Root extends ImmutableObject<RootProps> {
+    public static readonly TYPE_NAME = 'TaskList';
+
     public get lists() {
         return this.get('lists');
     }
@@ -14,7 +16,7 @@ export class Root extends ImmutableObject<RootProps> {
         super({
             lists: ImmutableMap.empty(),
             ...values || {}
-        }, 'Root');
+        }, Root.TYPE_NAME);
     }
 
     public add(list: TaskList) {
@@ -37,6 +39,8 @@ interface TaskListProps {
 }
 
 export class TaskList extends ImmutableObject<TaskListProps> {
+    public static readonly TYPE_NAME = 'TaskList';
+
     public get tasks() {
         return this.get('tasks');
     }
@@ -49,7 +53,7 @@ export class TaskList extends ImmutableObject<TaskListProps> {
         super({
             tasks: ImmutableMap.empty(),
             ...values || {},
-        }, 'TaskList');
+        }, TaskList.TYPE_NAME);
     }
 
     public add(task: TaskItem) {
@@ -76,6 +80,8 @@ interface TaskItemProps {
 }
 
 export class TaskItem extends ImmutableObject<TaskItemProps> {
+    public static readonly TYPE_NAME = 'TaskItem';
+
     public get color() {
         return this.get('color');
     }
@@ -88,7 +94,7 @@ export class TaskItem extends ImmutableObject<TaskItemProps> {
         super({
             title: '',
             ...values || {},
-        }, 'TaskItem');
+        }, TaskItem.TYPE_NAME);
     }
 
     public setColor(color?: Color) {
@@ -103,7 +109,7 @@ export class TaskItem extends ImmutableObject<TaskItemProps> {
 export class Color {
     public readonly __typeName = Color.TYPE_NAME;
 
-    public static readonly TYPE_NAME = 'ImmutableList';
+    public static readonly TYPE_NAME = 'Color';
 
     public constructor(
         public readonly value: string

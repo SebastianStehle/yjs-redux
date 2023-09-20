@@ -11,18 +11,12 @@ import ImmutableSetResolver from './../immutability/immutable-set-resolver';
 
 const options: Partial<SyncOptions> = {
     typeResolvers: {
-        Root: ImmutableObjectResolver.create<Root>(values => {
-            return new Root(values as any);
-        }),
-        TaskList: ImmutableObjectResolver.create<TaskList>(values => {
-            return new TaskList(values as any);
-        }),
-        TaskItem: ImmutableObjectResolver.create<TaskItem>(values => {
-            return new TaskItem(values as any);
-        }),
         [ImmutableList.TYPE_NAME]: ImmutableListResolver.INSTANCE,
         [ImmutableMap.TYPE_NAME]: ImmutableMapResolver.INSTANCE,
         [ImmutableSet.TYPE_NAME]: ImmutableSetResolver.INSTANCE,
+        [Root.TYPE_NAME]: ImmutableObjectResolver.create<Root>(values => new Root(values as any)),
+        [TaskItem.TYPE_NAME]: ImmutableObjectResolver.create<TaskItem>(values => new TaskItem(values as any)),
+        [TaskList.TYPE_NAME]: ImmutableObjectResolver.create<TaskList>(values => new TaskList(values as any)),
     },
 };
 
