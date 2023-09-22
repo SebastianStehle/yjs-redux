@@ -7,6 +7,8 @@ import { Nav, Navbar, NavbarBrand, NavItem, NavLink } from 'reactstrap';
 import { Presence } from './components/Presence';
 import { useYjsReduxBinder } from './../lib';
 
+localStorage.log = 'true';
+
 export const App = () => {
     const binder = useYjsReduxBinder();
     const [provider, setProvider] = React.useState<WebrtcProvider | null>(null);
@@ -14,7 +16,12 @@ export const App = () => {
 
     React.useEffect(() => {
         const doc = new Y.Doc();
-        const provider = new WebrtcProvider('demo-room4', doc);
+
+        const provider = new WebrtcProvider('demo-room', doc, {
+            signaling: ['wss://signaling.mydraft.cc']
+        });
+
+        console.log(`Using client ID ${provider.awareness.clientID}.`);
 
         setProvider(provider);
         

@@ -8,7 +8,7 @@ import { setSource } from './sync-internals';
 import { SourceArray, SourceObject, SyncOptions } from './sync-utils';
 import { isArray, isObject } from './utils';
 
-function valueToYjs(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
+function valueToYjs(source: any, options: SyncOptions, doc: Y.Doc | undefined, sliceName: string | undefined) {
     if (!source) {
         return source;
     }
@@ -50,17 +50,17 @@ function valueToYjs(source: any, options: SyncOptions, doc?: Y.Doc, sliceName?: 
             [TypeProperties.typeName]: typeName
         };
         
-        return valueToYjsObject(source, typeResolver.syncToYjs(source), initial, options, doc);
+        return valueToYjsObject(source, typeResolver.syncToYjs(source), initial, options, doc, sliceName);
     } else {
         const initial: any[] = [
             { [TypeProperties.typeName]: typeName }
         ];
         
-        return valueToYjsArray(source, typeResolver.syncToYjs(source), initial, options, doc);
+        return valueToYjsArray(source, typeResolver.syncToYjs(source), initial, options, doc, sliceName);
     }
 }
 
-function valueToYjsObject(source: any, values: SourceObject, initial: Record<string, object>, options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
+function valueToYjsObject(source: any, values: SourceObject, initial: Record<string, object>, options: SyncOptions,  doc: Y.Doc | undefined, sliceName: string | undefined) {
     let map: Y.Map<unknown>;
     if (doc) {
         map = doc.getMap(sliceName);
@@ -73,14 +73,14 @@ function valueToYjsObject(source: any, values: SourceObject, initial: Record<str
     }
 
     for (const [key, value] of Object.entries(values)) {
-        map.set(key, valueToYjs(value, options));
+        map.set(key, valueToYjs(value, options, undefined, undefined));
     }
 
     setSource(map, source);
     return map;
 }
 
-function valueToYjsArray(source: any, values: SourceArray, initial: any[], options: SyncOptions, doc?: Y.Doc, sliceName?: string) {
+function valueToYjsArray(source: any, values: SourceArray, initial: any[], options: SyncOptions,  doc: Y.Doc | undefined, sliceName: string | undefined) {
     let array: Y.Array<unknown>;
     if (doc) {
         array = doc.getArray(sliceName);
@@ -89,7 +89,7 @@ function valueToYjsArray(source: any, values: SourceArray, initial: any[], optio
     }
 
     array.push(initial);
-    array.push(values.map(v => valueToYjs(v, options)));
+    array.push(values.map(v => valueToYjs(v, options, undefined, undefined)));
 
     setSource(array, source);
     return array;
@@ -153,9 +153,9 @@ function diffObjectsCore(current: SourceObject, previous: SourceObject, source: 
         if (diff.type === 'Remove') {
             target.delete(key);
         } else if (diff.type === 'Add') {
-            target.set(key, valueToYjs(diff.value, options));
+            target.set(key, valueToYjs(diff.value, options, undefined, undefined));
         } else if (!diffValues(diff.value, diff.oldValue, target.get(diff.key), options)) {
-            target.set(key, valueToYjs(diff.value, options));
+            target.set(key, valueToYjs(diff.value, options, undefined, undefined));
         }
     }
 
@@ -206,10 +206,10 @@ function diffArraysCore(current: SourceArray, previous: SourceArray, source: any
         if (diff.type === 'Remove') {
             target.delete(index, diff.count);
         } else if (diff.type === 'Insert') {
-            target.insert(index, diff.values.map(v => valueToYjs(v, options)));
+            target.insert(index, diff.values.map(v => valueToYjs(v, options, undefined, undefined)));
         } else if (!diffValues(diff.value, diff.oldValue, target.get(diff.oldIndex + indexOffset), options)) {
             target.delete(index, 1);
-            target.insert(index, [valueToYjs(diff.value, options)]);
+            target.insert(index, [valueToYjs(diff.value, options, undefined, undefined)]);
         }
     }
     setSource(target, source);

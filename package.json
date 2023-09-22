@@ -17,7 +17,7 @@
     "url": "https://github.com/SebastianStehle/yjs-redux"
   },
   "typings": "dist/index.d.ts",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "files": [
     "dist",
     "lib"
@@ -43,6 +43,8 @@
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",
     "@vitest/browser": "^0.34.4",
+    "@y-sweet/react": "^0.0.8",
+    "@y-sweet/sdk": "^0.0.8",
     "bootstrap": "^5.3.2",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
