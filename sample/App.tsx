@@ -78,12 +78,14 @@ export const App = () => {
             return undefined;
         }
         
-        const disconnect = binder.connectSlice(clientDoc, 'tasks', root => {
+        const synchronizer = binder.connectSlice(clientDoc, 'tasks');
+
+        synchronizer.on('connected', ({ root }) => {
             setUndoManager(new Y.UndoManager(root));
         });
 
         disposer.current = () => {
-            disconnect();
+            synchronizer.destroy();
             
             provider.disconnect();
             provider.destroy();

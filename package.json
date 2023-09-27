@@ -17,7 +17,7 @@
     "url": "https://github.com/SebastianStehle/yjs-redux"
   },
   "typings": "dist/index.d.ts",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "files": [
     "dist",
     "lib"
@@ -32,9 +32,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@y-sweet/client": "^0.0.8",
-    "react-router": "^6.16.0",
-    "react-router-dom": "^6.16.0",
+    "lib0": "^0.2.86",
     "redux": "^4.2.1",
     "yjs": "^13.6.7"
   },
@@ -46,6 +44,7 @@
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",
     "@vitest/browser": "^0.34.4",
+    "@y-sweet/client": "^0.0.8",
     "@y-sweet/react": "^0.0.8",
     "@y-sweet/sdk": "^0.0.8",
     "bootstrap": "^5.3.2",
@@ -56,6 +55,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.1.2",
+    "react-router": "^6.16.0",
+    "react-router-dom": "^6.16.0",
     "reactstrap": "^9.2.0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
