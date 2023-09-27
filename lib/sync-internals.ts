@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
+import { Types } from '../sample/immutability/types';
 import { getTypeName, TypeProperties } from './identity';
 import { SyncOptions } from './sync-utils';
 import { isObject } from './utils';
@@ -119,4 +120,39 @@ function createFromArrayCore(source: Y.Array<any>, skipIndex: number, options: S
     } 
 
     return values;
+}
+
+export function getStateType(state: any, options: SyncOptions) {
+    const typeName = getTypeName(state);
+
+    if (!typeName) {
+        if (options.syncAlways) {
+            if (Types.isArray(state)) {
+                return 'Array';
+            }
+    
+            if (Types.isObject(state)) {
+                return 'Object';
+            }
+        }
+
+        throw new Error('Invalid Root type');
+    }
+    
+    const typeResolver = options.typeResolvers[typeName];
+
+    if (!typeResolver) {
+        throw new Error(`Cannot find type resolver for '${typeName}'.`);
+    }
+
+    return typeResolver.sourceType;
+}
+
+export function getRootType(doc: Y.Doc, name: string, initialState: any, options: SyncOptions) {
+    const root =
+        getStateType(initialState, options) === 'Array' ?
+            doc.getArray(name) :
+            doc.getMap(name);
+
+    return root;
 }

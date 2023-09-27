@@ -8,7 +8,7 @@ import { setSource } from './sync-internals';
 import { SourceArray, SourceObject, SyncOptions } from './sync-utils';
 import { isArray, isObject } from './utils';
 
-function valueToYjs(source: any, options: SyncOptions, root: Y.Map<any> | null) {
+function valueToYjs(source: any, options: SyncOptions, root: Y.AbstractType<any> | null) {
     if (!source) {
         return source;
     }
@@ -60,10 +60,14 @@ function valueToYjs(source: any, options: SyncOptions, root: Y.Map<any> | null) 
     }
 }
 
-function valueToYjsObject(source: any, values: SourceObject, initial: Record<string, object>, options: SyncOptions, root: Y.Map<any> | null) {
+function valueToYjsObject(source: any, values: SourceObject, initial: Record<string, object>, options: SyncOptions, root: Y.AbstractType<any> | null) {
     let map: Y.Map<unknown>;
     if (root) {
-        map = root;
+        if (root instanceof Y.Map) {
+            map = root;
+        } else {
+            throw new Error(`Root object must be an object, got ${typeof root}.`);
+        }
     } else {
         map = new Y.Map();
     }
@@ -80,10 +84,14 @@ function valueToYjsObject(source: any, values: SourceObject, initial: Record<str
     return map;
 }
 
-function valueToYjsArray(source: any, values: SourceArray, initial: any[], options: SyncOptions,  root: Y.Map<any> | null) {
+function valueToYjsArray(source: any, values: SourceArray, initial: any[], options: SyncOptions, root: Y.AbstractType<any> | null) {
     let array: Y.Array<unknown>;
     if (root) {
-        throw new Error('Root object must be a map.');
+        if (root instanceof Y.Array) {
+            array = root;
+        } else {
+            throw new Error(`Root object must be an array, got ${typeof root}.`);
+        }
     } else {
         array = new Y.Array();
     }
@@ -219,6 +227,6 @@ export function syncToYjs(current: any, previous: any, target: Y.AbstractType<an
     diffValues(current, previous, target, options);
 }
 
-export function initToYjs(current: any, root: Y.Map<any>, options: SyncOptions) {
+export function initToYjs(current: any, root: Y.AbstractType<any>, options: SyncOptions) {
     valueToYjs(current, options, root);
 }

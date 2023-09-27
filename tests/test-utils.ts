@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
+import { getRootType } from './../lib/sync-internals';
 import { SyncOptions, initToYjs, syncFromYjs } from './../lib/core';
 
 export function testInitialSync(initial: () => any, update: (root: Y.AbstractType<any>, prev: any) => void, options: SyncOptions) {
@@ -17,8 +18,11 @@ export function testInitialSync(initial: () => any, update: (root: Y.AbstractTyp
     const initial1 = initial();
     const initial2 = initial();
 
-    const root1 = initToYjs(initial1, doc1, 'slice', options);
-    const root2 = initToYjs(initial2, doc2, 'slice', options);
+    const root1 = getRootType(doc1, 'slice', initial1, options);
+    const root2 = getRootType(doc2, 'slice', initial2, options);
+
+    initToYjs(initial1, root1, options);
+    initToYjs(initial2, root2, options);
 
     const state = {
         synced: initial2

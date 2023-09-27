@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from './state/store';
 import { useNavigate, useParams } from 'react-router';
 import { loadProject, newProject } from './state/reducer';
-import { getCollaborationToken, useAsyncEffect } from './utils';
+import { getCollaborationToken, useAsyncEffect } from './collaboration';
 import { createYjsProvider, WebsocketProvider } from '@y-sweet/client';
 
 localStorage.log = 'true';

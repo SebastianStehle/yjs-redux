@@ -5,7 +5,7 @@ import { initToYjs, syncToYjs } from './sync-to-yjs';
 import { syncFromYjs } from './sync-from-yjs';
 import { DefaultSyncOptions, SyncOptions } from './sync-utils';
 import { isFunction, isObject } from './utils';
-import { yjsToValue } from './sync-internals';
+import { getRootType, getStateType, yjsToValue } from './sync-internals';
 import * as logging from 'lib0/logging';
 import { Observable } from 'lib0/observable';
 
@@ -136,7 +136,7 @@ export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
 const log = logging.createModuleLogger('yjs-redux');
 
 type SynchronizerEvents = {
-    'connected': (event: { root: Y.Map<any> }) => void;
+    'connected': (event: { root: Y.AbstractType<any> }) => void;
     'initToYjs': () => void;
     'initFromYjs': () => void;
     'syncedToYjs': () => void;
@@ -146,7 +146,7 @@ type SynchronizerEvents = {
 export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
     private readonly events = new EventTarget();
     private isSyncTransactionRunning = false;
-    private currentRoot: Y.Map<any> | null = null;
+    private currentRoot: Y.AbstractType<any> | null = null;
     private currentStore: MiddlewareAPI | null;
 
     constructor(
@@ -199,7 +199,7 @@ export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
         this.unsubscribe();
     }
 
-    private subscribe(root: Y.Map<any>) {
+    private subscribe(root: Y.AbstractType<any>) {
         this.currentRoot = root;
         this.currentRoot?.observeDeep(this.observerFunction);
     }
@@ -219,9 +219,10 @@ export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
 
         const sliceName = this.sliceName;
         const sliceExists = !!this.doc.share.get(sliceName);
+        const initialState = getState(store, this.sliceName);
 
         // The root will be created if it does not exists, therefore we check first, if it would exist.
-        const root = this.doc.getMap(sliceName);
+        const root = getRootType(this.doc, this.sliceName, initialState, this.options);
 
         if (sliceExists) {
             const state = yjsToValue(root, this.options);
@@ -233,7 +234,7 @@ export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
         } else {
             this.transact(() => {
                 // Make an initial synchronization which also creates the root type.
-                initToYjs(getState(store, sliceName), root, this.options);
+                initToYjs(initialState, root, this.options);
             });
 
             this.emit('initToYjs', []);
