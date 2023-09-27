@@ -5,13 +5,23 @@ import { Provider } from 'react-redux';
 import { binder, store } from './state/store';
 import { App } from './App';
 import { YjsReduxBinderProvider } from './../lib';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 import './index.css';
+
+const router = createBrowserRouter([
+    {
+        path: ":token?",
+        element: (
+            <App />
+        ),
+    }
+]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
         <YjsReduxBinderProvider binder={binder}>
-            <App />
+            <RouterProvider router={router} />
         </YjsReduxBinderProvider>
     </Provider>
 );

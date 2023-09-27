@@ -2,12 +2,25 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { Root, TaskItem, TaskList } from './state';
 
-const initialState = new Root();
+const initialState = new Root({ isEmpty: true });
+
 
 export const tasksSlice = createSlice({
     name: 'tasks',
     initialState,
     reducers: {
+        loadProject: (_, action: PayloadAction<{ identity: string }>) => {
+            return new Root({ identity: action.payload.identity });
+        },
+        newProject: () => {
+            const newState =
+                new Root()
+                    .add(new TaskList({ title: 'Todo' }))
+                    .add(new TaskList({ title: 'Doing' }))
+                    .add(new TaskList({ title: 'Done' }));
+
+            return newState;
+        },
         addList: (state) => {
             return state?.add(new TaskList());
         },
@@ -35,5 +48,5 @@ export const tasksSlice = createSlice({
     }
 });
 
-export const { addList, deleteList, addTask, deleteTask, setTaskTitle, setTaskColor } = tasksSlice.actions;
+export const { addList, deleteList, addTask, deleteTask, loadProject, newProject, setTaskTitle, setTaskColor } = tasksSlice.actions;
 export default tasksSlice.reducer;

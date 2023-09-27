@@ -6,12 +6,17 @@ import { RootState } from '../state/store';
 import { TaskListView } from './TaskListView';
 
 export const RootView = () => {
+    const root = useSelector((state: RootState) => state.tasks);
     const lists = useSelector((state: RootState) => state.tasks.lists);
     const dispatch = useDispatch();
 
     const doAdd = () => {
         dispatch(addList());
     };
+
+    if (root.isEmpty) {
+        return null;
+    }
 
     return (
         <div className='lists'>

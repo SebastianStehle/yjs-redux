@@ -5,6 +5,7 @@ import { initToYjs, syncToYjs } from './sync-to-yjs';
 import { syncFromYjs } from './sync-from-yjs';
 import { DefaultSyncOptions, SyncOptions } from './sync-utils';
 import { isFunction, isObject, logException } from './utils';
+import { yjsToValue } from './sync-internals';
 
 const SYNC_TYPE = 'SYNC_FROM_JS';
 
@@ -118,7 +119,7 @@ export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
 class SliceSynchonizer {
     private isSyncTransactionRunning = false;
     private disconnectHandler?: () => void;
-    private root: Y.Map<any> | Y.Array<any> | null = null;
+    private root: Y.Map<any> | null = null;
 
     constructor(
         private readonly doc: Y.Doc,
@@ -158,20 +159,24 @@ class SliceSynchonizer {
         }
 
         const sliceName = this.sliceName;
-            
-        this.transact(() => {
-            // Make an initial synchronization which also creates the root type.
-            this.root = initToYjs(getState(store, sliceName), this.doc, sliceName, this.options);
-            
-            this.onRootCreated?.(this.root);
-        });
+        const sliceExists = !!this.doc.share.get(sliceName);
 
-        const root = this.root!;
+        // The root will be created if it does not exists, therefore we check first, if it would exist.
+        const root = this.root = this.doc.getMap(sliceName);
 
-        if (root === null) {
-            // This should actually never happen.
-            throw new Error('Initial synchronization returns not root object.');
+        if (sliceExists) {
+            const initialState = yjsToValue(this.root, this.options);
+
+            // If the slice already exists in the document we synchronize from the remote store to the redux store.
+            store.dispatch(syncAction({ value: initialState, sliceName }));
+        } else {
+            this.transact(() => {
+                // Make an initial synchronization which also creates the root type.
+                initToYjs(getState(store, sliceName), root, this.options);
+            });
         }
+                
+        this.onRootCreated?.(root);
     
         const observerFunction = (events: Y.YEvent<any>[]) => {
             if (this.isSyncTransactionRunning) {
@@ -183,7 +188,7 @@ class SliceSynchonizer {
                 const stateNew = syncFromYjs<any>(stateOld, events, this.options);
         
                 if (stateOld !== stateNew) {
-                    store.dispatch(syncAction({ value: stateNew, sliceName: sliceName }));
+                    store.dispatch(syncAction({ value: stateNew, sliceName }));
                 }
             } catch (e) {
                 // This exception is sometimes swallowed, therefore we need to log it.

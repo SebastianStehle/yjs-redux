@@ -45,24 +45,65 @@ export type SourceObject = Readonly<{ [key: string]: unknown }>;
 
 export type SourceArray = ReadonlyArray<unknown>;
 
+/**
+ * Implements a type resolver that converts a value to either an array or object that can be converted to yjs.
+ */
 export interface TypeResolver<T, TSource, TDiff> {
+    /**
+     * Creates a new value from the source type.
+     *
+     * @param source - The source value.
+     */
     create(source: TSource): T;
 
+    /**
+     * Converts the typed value to an array or object.
+     * 
+     * @param value - The source value.
+     */
     syncToYjs(value: T): TSource;
 
+    /**
+     * Updates an existing instance from a list of diffs.
+     * 
+     * @param existing - The existing value.
+     * @param diffs - The list of differences.
+     * @returns The new value.
+     */
     syncToObject(existing: T, diffs: TDiff[]): T;
 }
 
+/**
+ * A type converter from objects.
+ */
 export interface ObjectTypeResolver<T> extends TypeResolver<T, SourceObject, ObjectDiff> {
     sourceType: 'Object';
 }
 
+/**
+ * A type converter from arrays.
+ */
 export interface ArrayTypeResolver<T> extends TypeResolver<T, SourceArray, ArrayDiff> {
     sourceType: 'Array';
 }
 
+/**
+ * Converts a value type from a plain javascript object that can be serialized.
+ */
 export interface ValueResolver<T> {
+    /**
+     * Creates a new value from a deserialized object.
+     * 
+     * @param source - The source object.
+     * @returns The created object.
+     */
     fromYjs(source: SourceObject): T;
 
+    /**
+     * Creates a plain object from the source value.
+     * 
+     * @param source - The source object.
+     * @returns The created object.
+     */
     fromValue(source: T): Record<string, unknown>;
 }

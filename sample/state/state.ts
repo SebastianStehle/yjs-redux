@@ -2,20 +2,31 @@ import { ImmutableMap, ImmutableObject } from './../immutability';
 import { SourceObject, ValueResolver } from './../../lib';
 
 interface RootProps {
+    identity: string;
+    isEmpty: boolean;
     lists: ImmutableMap<TaskList>;
 }
 
 export class Root extends ImmutableObject<RootProps> {
-    public static readonly TYPE_NAME = 'TaskList';
+    public static readonly TYPE_NAME = 'Root';
+
+    public get identity() {
+        return this.get('identity');
+    }
+
+    public get isEmpty() {
+        return this.get('isEmpty');
+    }
 
     public get lists() {
         return this.get('lists');
     }
 
-    constructor(values?: RootProps) {
+    constructor(values?: Partial<RootProps>) {
         super({
-            lists: ImmutableMap.empty(),
-            ...values || {}
+            lists: values?.lists || ImmutableMap.empty(),
+            identity: values?.identity || guid(),
+            isEmpty: values?.isEmpty || false,
         }, Root.TYPE_NAME);
     }
 
@@ -49,10 +60,10 @@ export class TaskList extends ImmutableObject<TaskListProps> {
         return this.get('title');
     }
 
-    constructor(values?: TaskListProps) {
+    constructor(values?: Partial<TaskListProps>) {
         super({
-            tasks: ImmutableMap.empty(),
-            ...values || {},
+            tasks: values?.tasks || ImmutableMap.empty(),
+            title: values?.title,
         }, TaskList.TYPE_NAME);
     }
 
@@ -92,8 +103,7 @@ export class TaskItem extends ImmutableObject<TaskItemProps> {
 
     constructor(values?: TaskItemProps) {
         super({
-            title: '',
-            ...values || {},
+            ...values
         }, TaskItem.TYPE_NAME);
     }
 
@@ -132,4 +142,12 @@ export class ColorValueResolver implements ValueResolver<Color> {
     public fromValue(source: Color): Readonly<{ [key: string]: unknown; }> {
         return { value: source.value };
     }
+}
+
+export function guid() {
+    return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
+}
+
+export function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 }

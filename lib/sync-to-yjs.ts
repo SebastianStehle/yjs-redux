@@ -8,7 +8,7 @@ import { setSource } from './sync-internals';
 import { SourceArray, SourceObject, SyncOptions } from './sync-utils';
 import { isArray, isObject } from './utils';
 
-function valueToYjs(source: any, options: SyncOptions, doc: Y.Doc | undefined, sliceName: string | undefined) {
+function valueToYjs(source: any, options: SyncOptions, root: Y.Map<any> | null) {
     if (!source) {
         return source;
     }
@@ -18,11 +18,11 @@ function valueToYjs(source: any, options: SyncOptions, doc: Y.Doc | undefined, s
     if (!typeName) {
         if (options.syncAlways) {
             if (isArray(source) && !options.isValueType(source)) {
-                return valueToYjsArray(source, source, [], options, doc, sliceName);
+                return valueToYjsArray(source, source, [], options, root);
             }
             
             if (isObject(source) && !options.isValueType(source)) {
-                return valueToYjsObject(source, source, {}, options, doc, sliceName);
+                return valueToYjsObject(source, source, {}, options, root);
             }
         }
 
@@ -50,20 +50,20 @@ function valueToYjs(source: any, options: SyncOptions, doc: Y.Doc | undefined, s
             [TypeProperties.typeName]: typeName
         };
         
-        return valueToYjsObject(source, typeResolver.syncToYjs(source), initial, options, doc, sliceName);
+        return valueToYjsObject(source, typeResolver.syncToYjs(source), initial, options, root);
     } else {
         const initial: any[] = [
             { [TypeProperties.typeName]: typeName }
         ];
         
-        return valueToYjsArray(source, typeResolver.syncToYjs(source), initial, options, doc, sliceName);
+        return valueToYjsArray(source, typeResolver.syncToYjs(source), initial, options, root);
     }
 }
 
-function valueToYjsObject(source: any, values: SourceObject, initial: Record<string, object>, options: SyncOptions,  doc: Y.Doc | undefined, sliceName: string | undefined) {
+function valueToYjsObject(source: any, values: SourceObject, initial: Record<string, object>, options: SyncOptions, root: Y.Map<any> | null) {
     let map: Y.Map<unknown>;
-    if (doc) {
-        map = doc.getMap(sliceName);
+    if (root) {
+        map = root;
     } else {
         map = new Y.Map();
     }
@@ -73,23 +73,23 @@ function valueToYjsObject(source: any, values: SourceObject, initial: Record<str
     }
 
     for (const [key, value] of Object.entries(values)) {
-        map.set(key, valueToYjs(value, options, undefined, undefined));
+        map.set(key, valueToYjs(value, options, null));
     }
 
     setSource(map, source);
     return map;
 }
 
-function valueToYjsArray(source: any, values: SourceArray, initial: any[], options: SyncOptions,  doc: Y.Doc | undefined, sliceName: string | undefined) {
+function valueToYjsArray(source: any, values: SourceArray, initial: any[], options: SyncOptions,  root: Y.Map<any> | null) {
     let array: Y.Array<unknown>;
-    if (doc) {
-        array = doc.getArray(sliceName);
+    if (root) {
+        throw new Error('Root object must be a map.');
     } else {
         array = new Y.Array();
     }
 
     array.push(initial);
-    array.push(values.map(v => valueToYjs(v, options, undefined, undefined)));
+    array.push(values.map(v => valueToYjs(v, options, null)));
 
     setSource(array, source);
     return array;
@@ -153,9 +153,9 @@ function diffObjectsCore(current: SourceObject, previous: SourceObject, source: 
         if (diff.type === 'Remove') {
             target.delete(key);
         } else if (diff.type === 'Add') {
-            target.set(key, valueToYjs(diff.value, options, undefined, undefined));
+            target.set(key, valueToYjs(diff.value, options, null));
         } else if (!diffValues(diff.value, diff.oldValue, target.get(diff.key), options)) {
-            target.set(key, valueToYjs(diff.value, options, undefined, undefined));
+            target.set(key, valueToYjs(diff.value, options, null));
         }
     }
 
@@ -206,10 +206,10 @@ function diffArraysCore(current: SourceArray, previous: SourceArray, source: any
         if (diff.type === 'Remove') {
             target.delete(index, diff.count);
         } else if (diff.type === 'Insert') {
-            target.insert(index, diff.values.map(v => valueToYjs(v, options, undefined, undefined)));
+            target.insert(index, diff.values.map(v => valueToYjs(v, options, null)));
         } else if (!diffValues(diff.value, diff.oldValue, target.get(diff.oldIndex + indexOffset), options)) {
             target.delete(index, 1);
-            target.insert(index, [valueToYjs(diff.value, options, undefined, undefined)]);
+            target.insert(index, [valueToYjs(diff.value, options, null)]);
         }
     }
     setSource(target, source);
@@ -219,12 +219,6 @@ export function syncToYjs(current: any, previous: any, target: Y.AbstractType<an
     diffValues(current, previous, target, options);
 }
 
-export function initToYjs(current: any, doc: Y.Doc, sliceName: string | undefined, options: SyncOptions) {
-    const result = valueToYjs(current, options, doc, sliceName);
-
-    if (!(result instanceof Y.Array) && !(result instanceof Y.Map)) {
-        throw new Error('Root object must map to a yjs object.');
-    }
-
-    return result;
+export function initToYjs(current: any, root: Y.Map<any>, options: SyncOptions) {
+    valueToYjs(current, options, root);
 }

@@ -32,6 +32,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@y-sweet/client": "^0.0.8",
+    "react-router": "^6.16.0",
+    "react-router-dom": "^6.16.0",
     "redux": "^4.2.1",
     "yjs": "^13.6.7"
   },

@@ -6,13 +6,13 @@ import { idGenerator } from '../immutability/helpers';
 
 type UserInfo = { id: string, color: string, initial: string, self?: true };
 
+const currentUser = { id: idGenerator(), ...getRandomUser() };
+
 export const Presence = (props: { awareness: awarenessProtocol.Awareness }) => {
     const { awareness } = props;
     const [users, setUsers] = React.useState([] as UserInfo[]);
 
     React.useEffect(() => {
-        const randomUser = getRandomUser();
-
         awareness.on('change', () => {
             const users: UserInfo[] = [];
             const values = awareness.getStates().values();
@@ -25,7 +25,7 @@ export const Presence = (props: { awareness: awarenessProtocol.Awareness }) => {
                     break;
                 }
 
-                const user = next.value.user as UserInfo;
+                const user = next.value as UserInfo;
 
                 if (user?.id) {
                     users.push(user);
@@ -39,7 +39,7 @@ export const Presence = (props: { awareness: awarenessProtocol.Awareness }) => {
             setUsers(users);
         });
 
-        awareness.setLocalStateField('user', { id: idGenerator(), ...randomUser });
+        awareness.setLocalState(currentUser);
     }, [awareness]);
 
     return (
