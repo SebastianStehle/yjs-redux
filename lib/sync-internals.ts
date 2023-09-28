@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import { Types } from '../sample/immutability/types';
 import { getTypeName, TypeProperties } from './identity';
 import { SyncOptions } from './sync-utils';
-import { isObject } from './utils';
+import { isArray, isObject } from './utils';
 
 const mapToTarget = new WeakMap();
 
@@ -127,11 +126,11 @@ export function getStateType(state: any, options: SyncOptions) {
 
     if (!typeName) {
         if (options.syncAlways) {
-            if (Types.isArray(state)) {
+            if (isArray(state)) {
                 return 'Array';
             }
     
-            if (Types.isObject(state)) {
+            if (isObject(state)) {
                 return 'Object';
             }
         }
