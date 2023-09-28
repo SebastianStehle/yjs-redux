@@ -75,7 +75,7 @@ export const App = () => {
         
         const synchronizer = binder.connectSlice({
             document: provider.document,
-            onConnected: root => {
+            onSynced: root => {
                 setUndoManager(new Y.UndoManager(root));
             },
             sliceName: 'tasks'

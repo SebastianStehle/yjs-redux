@@ -55,33 +55,29 @@ export type ConnectOptions = {
     /**
      * Invoked, when the initial sync has been done.
      */
-    onConnected?: (root: Y.AbstractType<any>) => void;
+    onSynced?: (root: Y.AbstractType<any>) => void;
 
     /**
      * Invoked, when the a sync to yjs has been completed.
      */
-    onSyncedToYjs?: () => void;
+    onUpdateToYjs?: () => void;
 
     /**
      * Invoked, when the a sync from yjs has been completed.
      */
-    onSyncedFromYjs?: () => void;
+    onUpdateFromYjs?: () => void;
 
     /**
      * Invoked, when the initial sync from yjs has been completed.
+     * 
+     * @param The initial state.
      */
-    onInitFromYjs?: () => void;
+    onSyncedAsInit?: (state: any) => void;
 
     /**
      * Invoked, when the initial sync to yjs has been completed.
      */
-    onInitToYjs?: () => void;
-
-    /**
-     * Invoked when the initial state has been read from yjs.
-     * @param The initial state.
-     */
-    onReadFromYjs?: (state: any) => void;
+    onSyncedAsDiff?: () => void;
 };
 
 export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
@@ -207,7 +203,7 @@ export class SliceSynchonizer {
             syncToYjs(sliceCurrent, slicePrevious, root, this.options);
         });
 
-        this.connectOptions.onSyncedToYjs?.();
+        this.connectOptions.onUpdateToYjs?.();
     }
 
     public destroy() {
@@ -244,22 +240,20 @@ export class SliceSynchonizer {
         if (sliceExists) {
             const state = yjsToValue(root, this.options);
 
-            this.connectOptions.onReadFromYjs?.(state);
-
             // If the slice already exists in the document we synchronize from the remote store to the redux store.
             store.dispatch(syncAction({ state, sliceName }));
 
-            this.connectOptions.onInitFromYjs?.();
+            this.connectOptions.onSyncedAsInit?.(state);
         } else {
             this.transact(() => {
                 // Make an initial synchronization which also creates the root type.
                 initToYjs(initialState, root, this.options);
             });
 
-            this.connectOptions.onSyncedFromYjs?.();
+            this.connectOptions.onSyncedAsDiff?.();
         }
                 
-        this.connectOptions.onConnected?.(root);
+        this.connectOptions.onSynced?.(root);
         this.subscribe(root);
     }
 
@@ -278,7 +272,7 @@ export class SliceSynchonizer {
                 
             this.currentStore.dispatch(syncAction({ state: stateNew, sliceName: this.sliceName }));
 
-            this.connectOptions.onSyncedFromYjs?.();
+            this.connectOptions.onUpdateFromYjs?.();
         } catch (e) {
             log('Error in synchronizing from jys', e);
             throw e;
