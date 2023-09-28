@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from './state/store';
 import { useNavigate, useParams } from 'react-router';
 import { loadProject, newProject } from './state/reducer';
-import { useAsyncEffect } from './collaboration';
+import { useAsyncEffect } from './utils';
 import { TiptapCollabProvider  } from "@hocuspocus/provider";
 
 localStorage.log = 'true';
