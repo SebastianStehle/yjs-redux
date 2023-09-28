@@ -143,7 +143,8 @@ type SynchronizerEvents = {
     'syncedFromYjs': () => void;
 };
 
-export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
+export class SliceSynchonizer {
+    private readonly events = new Observable<keyof SynchronizerEvents>();
     private isSyncTransactionRunning = false;
     private currentRoot: Y.AbstractType<any> | null = null;
     private currentStore: MiddlewareAPI | null = null;
@@ -154,8 +155,6 @@ export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
         private readonly sliceName: string,
         private readonly synchronizers: Record<string, SliceSynchonizer>
     ) {
-        super();
-
         synchronizers[sliceName] = this;
     }
 
@@ -177,11 +176,7 @@ export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
             syncToYjs(sliceCurrent, slicePrevious, root, this.options);
         });
 
-        this.emit('syncedToYjs', []);
-    }
-
-    public off<NAME extends keyof SynchronizerEvents>(name: NAME, handler: SynchronizerEvents[NAME]) {
-        super.off(name, handler);
+        this.events.emit('syncedToYjs', []);
     }
 
     public on<NAME extends keyof SynchronizerEvents>(name: NAME, handler: SynchronizerEvents[NAME]) {
@@ -189,7 +184,11 @@ export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
             handler({ root: this.currentRoot });
         }
 
-        super.on(name, handler);
+        this.events.on(name, handler);
+    }
+
+    public off<NAME extends keyof SynchronizerEvents>(name: NAME, handler: SynchronizerEvents[NAME]) {
+        this.events.off(name, handler);
     }
 
     public destroy() {
@@ -229,17 +228,17 @@ export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
             // If the slice already exists in the document we synchronize from the remote store to the redux store.
             store.dispatch(syncAction({ state, sliceName }));
 
-            this.emit('initFromYjs', []);
+            this.events.emit('initFromYjs', []);
         } else {
             this.transact(() => {
                 // Make an initial synchronization which also creates the root type.
                 initToYjs(initialState, root, this.options);
             });
 
-            this.emit('initToYjs', []);
+            this.events.emit('initToYjs', []);
         }
                 
-        this.emit('connected', [{ root }]);
+        this.events.emit('connected', [{ root }]);
         this.subscribe(root);
     }
 
@@ -258,7 +257,7 @@ export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
                 
             this.currentStore.dispatch(syncAction({ state: stateNew, sliceName: this.sliceName }));
 
-            this.emit('syncedFromYjs', []);
+            this.events.emit('syncedFromYjs', []);
         } catch (e) {
             log('Error in synchronizing from jys', e);
             throw e;
