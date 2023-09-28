@@ -9,8 +9,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from './state/store';
 import { useNavigate, useParams } from 'react-router';
 import { loadProject, newProject } from './state/reducer';
-import { getCollaborationToken, useAsyncEffect } from './collaboration';
-import { createYjsProvider, WebsocketProvider } from '@y-sweet/client';
+import { useAsyncEffect } from './collaboration';
+import { TiptapCollabProvider  } from "@hocuspocus/provider";
 
 localStorage.log = 'true';
 
@@ -33,7 +33,7 @@ export const App = () => {
     const navigate = useNavigate();
     const routeToken = useInitialToken();
     const rootState = useSelector((state: RootState) => state.tasks);
-    const [provider, setProvider] = React.useState<WebsocketProvider | null>(null);
+    const [provider, setProvider] = React.useState<TiptapCollabProvider | null>(null);
     const [undoManager, setUndoManager] = React.useState<Y.UndoManager | null>(null);
 
     React.useEffect(() => {
@@ -51,34 +51,29 @@ export const App = () => {
     }, [navigate, rootState]);
 
     useAsyncEffect(async cancellation => {
-        const clientDoc = new Y.Doc();
-        const clientToken = await getCollaborationToken(rootState.identity);
-
         if (cancellation?.isCancelled) {
             return undefined;
         }
-        
-        const provider = createYjsProvider(clientDoc, clientToken, {
-            disableBc: true,
-        });
+
+        const provider = new TiptapCollabProvider({ appId: '7ME5ZQMY', name: rootState.identity });
 
         setProvider(provider);
 
         await new Promise(resolve => {
             const handler = () => {
-                if (provider.wsconnected && provider.synced) {
+                if (!provider.hasUnsyncedChanges && provider.isConnected) {
                     resolve(true);
                 }
             };
 
-            provider.on('synced', handler);
+            provider.on('unsyncedChanges', handler);
         });
 
         if (cancellation?.isCancelled) {
             return undefined;
         }
         
-        const synchronizer = binder.connectSlice(clientDoc, 'tasks');
+        const synchronizer = binder.connectSlice(provider.document, 'tasks');
 
         synchronizer.on('connected', ({ root }) => {
             setUndoManager(new Y.UndoManager(root));

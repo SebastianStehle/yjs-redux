@@ -8,12 +8,16 @@ type UserInfo = { id: string, color: string, initial: string, self?: true };
 
 const currentUser = { id: idGenerator(), ...getRandomUser() };
 
-export const Presence = (props: { awareness: awarenessProtocol.Awareness }) => {
+export const Presence = (props: { awareness: awarenessProtocol.Awareness | null }) => {
     const { awareness } = props;
     const [users, setUsers] = React.useState([] as UserInfo[]);
 
     React.useEffect(() => {
-        awareness.on('change', () => {
+        if (!awareness) {
+            return;
+        }
+
+        const changeHandler = () => {
             const users: UserInfo[] = [];
             const values = awareness.getStates().values();
 
@@ -37,9 +41,14 @@ export const Presence = (props: { awareness: awarenessProtocol.Awareness }) => {
             });
 
             setUsers(users);
-        });
+        };
 
+        awareness.on('change', changeHandler);
         awareness.setLocalState(currentUser);
+
+        return () => {
+            awareness.off('change', changeHandler);
+        };
     }, [awareness]);
 
     return (

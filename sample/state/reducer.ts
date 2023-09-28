@@ -10,7 +10,7 @@ export const tasksSlice = createSlice({
     initialState,
     reducers: {
         loadProject: (_, action: PayloadAction<{ identity: string }>) => {
-            return new Root({ identity: action.payload.identity });
+            return new Root({ identity: action.payload.identity, isEmpty: true });
         },
         newProject: () => {
             const newState =
