@@ -5,7 +5,7 @@ import { initToYjs, syncToYjs } from './sync-to-yjs';
 import { syncFromYjs } from './sync-from-yjs';
 import { DefaultSyncOptions, SyncOptions } from './sync-utils';
 import { isFunction, isObject } from './utils';
-import { getRootType, getStateType, yjsToValue } from './sync-internals';
+import { getRootType, yjsToValue } from './sync-internals';
 import * as logging from 'lib0/logging';
 import { Observable } from 'lib0/observable';
 
@@ -144,10 +144,9 @@ type SynchronizerEvents = {
 };
 
 export class SliceSynchonizer extends Observable<keyof SynchronizerEvents> {
-    private readonly events = new EventTarget();
     private isSyncTransactionRunning = false;
     private currentRoot: Y.AbstractType<any> | null = null;
-    private currentStore: MiddlewareAPI | null;
+    private currentStore: MiddlewareAPI | null = null;
 
     constructor(
         private readonly doc: Y.Doc,
