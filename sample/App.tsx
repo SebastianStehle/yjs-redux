@@ -73,10 +73,12 @@ export const App = () => {
             return undefined;
         }
         
-        const synchronizer = binder.connectSlice(provider.document, 'tasks');
-
-        synchronizer.on('connected', ({ root }) => {
-            setUndoManager(new Y.UndoManager(root));
+        const synchronizer = binder.connectSlice({
+            document: provider.document,
+            onConnected: root => {
+                setUndoManager(new Y.UndoManager(root));
+            },
+            sliceName: 'tasks'
         });
 
         disposer.current = () => {
