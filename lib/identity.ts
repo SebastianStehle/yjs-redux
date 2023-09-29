@@ -1,9 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const TypeProperties = {
+    /**
+     * The unique ID of the object across generations.
+     */
     instanceId: '__instanceId',
 
-    // Used to identity the type name of previous files.
+    /**
+     * Used to identity the type name of previous files.
+     */
     typeName: '__typeName',
+
+    /**
+     * Used to identiy how often an object has been updated.
+     */
+    generation: '__generation',
 };
 
 type TypeInfo = string | undefined | null;

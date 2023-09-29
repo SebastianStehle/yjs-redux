@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
 import { isArray, isString } from './../lib/utils';
-import { ArrayDiff, ArrayTypeResolver, DefaultSyncOptions, ObjectDiff, ObjectTypeResolver, SourceArray, SourceObject, SyncOptions, syncToYjs, TypeProperties } from './../lib/core';
+import { ArrayDiff, ArrayTypeResolver, DefaultSyncOptions, ObjectDiff, ObjectTypeResolver, SourceArray, SourceObject, SyncOptions, TypeProperties } from './../lib/core';
 import { testInitialSync } from './test-utils';
 
 let id = 0;
@@ -109,19 +109,19 @@ const options: SyncOptions = {
 
 describe('Redux classes', () => {
     test('should add value to empty array', () => {
-        const initial = () => new ImmutableArray('1', 0, []);
+        const initial = new ImmutableArray('1', 0, []);
 
         const update = new ImmutableArray('1', 1, [
             11,
         ]);
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+        
+        assertSync(result, update);
     });
 
     test('should add value to existing array', () => {
-        const initial = () => new ImmutableArray('1', 0, [
+        const initial = new ImmutableArray('1', 0, [
             11,
         ]);
 
@@ -130,14 +130,14 @@ describe('Redux classes', () => {
             12,
         ]);
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+        
+        assertSync(result, update);
     });
 
 
     test('should add complex object', () => {
-        const initial = () => new ImmutableObject('1', 0, {});
+        const initial = new ImmutableObject('1', 0, {});
     
         const update = new ImmutableObject('1', 1, {
             nested1: new ImmutableArray('2', 0, [
@@ -151,25 +151,25 @@ describe('Redux classes', () => {
             ])
         });
     
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-    
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+        
+        assertSync(result, update);
     });
 
     test('should add property to object', () => {
-        const initial = () => new ImmutableObject('1', 0, {});
+        const initial = new ImmutableObject('1', 0, {});
 
         const update = new ImmutableObject('1', 1, {
             newKey: 'Hello Redux'
         });
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+        
+        assertSync(result, update);
     });
 
     test('should remove items from array', () => {
-        const initial = () => new ImmutableArray('1', 0, [
+        const initial = new ImmutableArray('1', 0, [
             11,
             12,
             13
@@ -179,26 +179,26 @@ describe('Redux classes', () => {
             13,
         ]);
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+        
+        assertSync(result, update);
     });
 
     test('should remove property from object', () => {
-        const initial = () =>  new ImmutableObject('1', 0, {
+        const initial = new ImmutableObject('1', 0, {
             removedKey: 'Hello Redux'
         });
 
         const update = new ImmutableObject('1', 1, {
         });
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+        
+        assertSync(result, update);
     });
 
     test('should update property in object', () => {
-        const initial =  () => new ImmutableObject('1', 0, {
+        const initial = new ImmutableObject('1', 0, {
             updatedKey: 'Hello Redux'
         });
 
@@ -206,13 +206,13 @@ describe('Redux classes', () => {
             updatedKey: 'Hello Yjs'
         });
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+        
+        assertSync(result, update);
     });
 
     test('should update property in array', () => {
-        const initial =  () => new ImmutableArray('1', 0, [
+        const initial = new ImmutableArray('1', 0, [
             11,
             12,
             13
@@ -224,17 +224,17 @@ describe('Redux classes', () => {
             13
         ]);
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+        
+        assertSync(result, update);
     });
 
     test('should update property in complex object', () => {
-        const initial = () => new ImmutableObject('1', 0, {
+        const initial = new ImmutableObject('1', 0, {
             nested1: new ImmutableArray('2', 0, [
                 new ImmutableObject('3', 0, {
                     nested1_1: new ImmutableArray('4', 0, [
-                        new ImmutableObject('5', 1, {
+                        new ImmutableObject('5', 0, {
                             nested1_1_1: 'Hello Redux'
                         }),
                     ]),
@@ -243,7 +243,7 @@ describe('Redux classes', () => {
             nested2: new ImmutableArray('2', 0, [
                 new ImmutableObject('3', 0, {
                     nested2_1: new ImmutableArray('4', 0, [
-                        new ImmutableObject('5', 1, {
+                        new ImmutableObject('5', 0, {
                             nested2_1_1: 'Hello Redux'
                         }),
                     ]),
@@ -255,7 +255,7 @@ describe('Redux classes', () => {
             nested1: new ImmutableArray('2', 1, [
                 new ImmutableObject('3', 1, {
                     nested1_1: new ImmutableArray('4', 1, [
-                        new ImmutableObject('5', 2, {
+                        new ImmutableObject('5', 1, {
                             nested1_1_1: 'Hello Yjs'
                         }),
                     ]),
@@ -264,7 +264,7 @@ describe('Redux classes', () => {
             nested2: new ImmutableArray('2', 0, [
                 new ImmutableObject('3', 0, {
                     nested2_1: new ImmutableArray('4', 0, [
-                        new ImmutableObject('5', 1, {
+                        new ImmutableObject('5', 0, {
                             nested2_1_1: 'Hello Redux'
                         }),
                     ]),
@@ -272,26 +272,37 @@ describe('Redux classes', () => {
             ])
         });
     
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
-    
-        expect(removeInstanceIds(result)).toEqual(removeInstanceIds(update));
+        const result = testInitialSync(initial, update, options);
+
+        assertSync(result, update);
     });
 });
 
-function removeInstanceIds(source: any) {
+function assertSync(result: { afterSync: any; afterRead: any; }, update: any) {
+    const { afterSync, afterRead } = result;
+
+    removeProperty(afterSync, TypeProperties.instanceId);
+    removeProperty(afterRead, TypeProperties.instanceId);
+    removeProperty(afterRead, TypeProperties.generation);
+
+    expect(afterSync).toEqual(removeProperty(update, TypeProperties.instanceId));
+    expect(afterRead).toEqual(removeProperty(update, TypeProperties.generation));
+}
+
+function removeProperty(source: any, property: string) {
     if (source) {
-        delete source[TypeProperties.instanceId];
+        delete source[property];
     }
 
     if (!isString(source)) {
         for (const key of Object.keys(source)) {
-            removeInstanceIds((source as any)[key]);
+            removeProperty((source as any)[key], property);
         }
     }
 
     if (isArray(source)) {
         for (const value of source) {
-            removeInstanceIds(value);
+            removeProperty(value, property);
         }
     }
 

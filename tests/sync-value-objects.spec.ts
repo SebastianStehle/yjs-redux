@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { syncToYjs, SourceObject, SyncOptions, ValueResolver, DefaultSyncOptions } from './../lib/core';
+import { SourceObject, SyncOptions, ValueResolver, DefaultSyncOptions } from './../lib/core';
 import { testInitialSync } from './test-utils';
 
 class Color {
@@ -38,30 +38,36 @@ const options: SyncOptions = {
 
 describe('value objects', () => {
     test('should add value type', () => {
-        const initial = () => ({});
+        const initial = {};
     
         const update = {
             color: new Color('yellow'),
         };
     
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
     
-        expect(result).toEqual(update);
-        expect(result.color instanceof Color).toBeTruthy();
+        assertSync(result, update);
     });
     
     test('should replace value type', () => {
-        const initial = () => ({
+        const initial = {
             color: new Color('red'),
-        });
+        };
     
         const update = {
             color: new Color('green'),
         };
     
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
     
-        expect(result).toEqual(update);
-        expect(result.color instanceof Color).toBeTruthy();
+        assertSync(result, update);
     });
 });
+
+function assertSync(result: { afterSync: any; afterRead: any; }, update: any) {
+    expect(result.afterRead).toEqual(update);
+    expect(result.afterRead.color instanceof Color).toBeTruthy();
+
+    expect(result.afterSync).toEqual(update);
+    expect(result.afterSync.color instanceof Color).toBeTruthy();
+}

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
-import { DefaultSyncOptions, SyncOptions, syncToYjs } from './../lib/core';
+import { DefaultSyncOptions, SyncOptions } from './../lib/core';
 import { testInitialSync } from './test-utils';
 
 const options: SyncOptions = {
@@ -9,34 +9,34 @@ const options: SyncOptions = {
 
 describe('Redux objects', () => {
     test('should add value to existing array', () => {
-        const initial = () => [
+        const initial = [
             11,
         ];
 
         const update = [
-            12,
+            11,
             12,
         ];
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
 
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should add value to empty array', () => {
-        const initial = () => [];
+        const initial = [];
 
         const update = [
             11,
         ];
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
 
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should add complex object', () => {
-        const initial = () => ({});
+        const initial = {};
     
         const update = {
             nested1: [
@@ -50,25 +50,25 @@ describe('Redux objects', () => {
             ]
         };
     
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
     
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should add property to object', () => {
-        const initial = () => ({});
+        const initial = {};
 
         const update = {
             newKey: 'Hello Redux'
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
 
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should remove items from array', () => {
-        const initial = () => [
+        const initial = [
             11,
             12,
             13
@@ -78,40 +78,40 @@ describe('Redux objects', () => {
             13,
         ];
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
 
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should remove property from object', () => {
-        const initial = () => ({
+        const initial = {
             removedKey: 'Hello Redux'
-        });
+        };
 
         const update = {
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
 
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should update property in object', () => {
-        const initial =  () => ({
+        const initial = {
             updatedKey: 'Hello Redux'
-        });
+        };
 
         const update = {
             updatedKey: 'Hello Yjs'
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
 
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should update item in array', () => {
-        const initial =  () => [
+        const initial = [
             11,
             12,
             13
@@ -123,9 +123,9 @@ describe('Redux objects', () => {
             33
         ];
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
 
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should update value in value type', () => {
@@ -134,7 +134,7 @@ describe('Redux objects', () => {
             isValueType: value => (value as any)['isValueType'] === true,
         };
 
-        const initial =  () => ({});
+        const initial = {};
 
         const update = {
             update: {
@@ -144,13 +144,13 @@ describe('Redux objects', () => {
             }
         };
 
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, actualOptions), actualOptions);
+        const result = testInitialSync(initial, update, actualOptions);
 
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 
     test('should update property in complex object', () => {
-        const initial = () => ({
+        const initial = {
             nested1: [
                 {
                     nested1_1: [
@@ -169,7 +169,7 @@ describe('Redux objects', () => {
                     ]
                 }
             ]
-        });
+        };
     
         const update = {
             nested1: [
@@ -192,8 +192,13 @@ describe('Redux objects', () => {
             ]
         };
     
-        const result = testInitialSync(initial, (root, prev) => syncToYjs(update, prev, root, options), options);
+        const result = testInitialSync(initial, update, options);
     
-        expect(result).toEqual(update);
+        assertSync(result, update);
     });
 });
+
+function assertSync(result: { afterSync: any; afterRead: any; }, update: any) {
+    expect(result.afterRead).toEqual(update);
+    expect(result.afterSync).toEqual(update);
+}

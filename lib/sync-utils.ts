@@ -1,14 +1,27 @@
 export type SyncOptions = {
-    // The type resolvers.
+    /**
+     * The type resolvers.
+     */
     typeResolvers: Record<string, ObjectTypeResolver<unknown> | ArrayTypeResolver<unknown>>;
 
-    // The value resolvers.
+    /**
+     * The value resolvers.
+     */
     valueResolvers: Record<string, ValueResolver<unknown>>;
 
-    // True when all objects should be synced.
+    /**
+     * True when all objects should be synced.
+     */
     syncAlways: boolean;
 
-    // Return true, when a value should be handled as value object and not be mapped to an array.
+    /**
+     * Keep the type name in the value options input.
+     */
+    keepTypeNameForValueOptions?: boolean;
+
+    /**
+     * Return true, when a value should be handled as value object and not be mapped to an array.
+     */
     isValueType: (value: SourceArray | SourceObject) => boolean;
 };
 

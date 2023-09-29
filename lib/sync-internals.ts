@@ -52,8 +52,14 @@ export function yjsToValue(source: any, options: SyncOptions) {
             throw new Error(`Cannot find value resolver for '${typeName}'.`);
         }
 
-        // Delete the type name, because it was not part of the object that has been created when syncing to yjs.
-        delete source[TypeProperties.typeName];
+        // This is just minor performance improvement to reduce the allocations.
+        if (!options.keepTypeNameForValueOptions) {
+            // Create a copy, because we have to remove the type name.
+            source = { ...source };
+    
+            // Delete the type name, because it was not part of the object that has been created when syncing to yjs.
+            delete source[TypeProperties.typeName];
+        }
 
         return valueResolver.fromYjs(source);
     }

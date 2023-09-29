@@ -209,7 +209,7 @@ function diffArraysCore(current: SourceArray, previous: SourceArray, source: any
     const diffs = calculateArrayDiffs(current, previous);
 
     for (const diff of diffs) {
-        const index = diff.index;
+        const index = diff.index + indexOffset;
     
         if (diff.type === 'Remove') {
             target.delete(index, diff.count);

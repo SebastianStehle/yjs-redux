@@ -17,7 +17,7 @@
     "url": "https://github.com/SebastianStehle/yjs-redux"
   },
   "typings": "dist/index.d.ts",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "files": [
     "dist",
     "lib"
@@ -28,6 +28,7 @@
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest --browser",
+    "test:only": "vitest tests/sync-value-objects.spec.ts --browser",
     "test:ci": "vitest run --browser.name=chromium --browser.provider=playwright --browser.headless",
     "preview": "vite preview"
   },

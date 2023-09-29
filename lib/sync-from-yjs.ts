@@ -42,6 +42,7 @@ function syncValue(source: any, options: SyncOptions) {
 }
 
 function syncObject(source: Readonly<Record<string, object>>, event: Y.YEvent<any> | undefined, options: SyncOptions) {
+    // Diffs is null to by default reduce the allocations if there is no change.
     let result: Record<string, object> | undefined = undefined;
 
     // Because of immutability we have to check if there is a change down the path.
@@ -82,6 +83,7 @@ function syncObject(source: Readonly<Record<string, object>>, event: Y.YEvent<an
 }
 
 function syncTypedObject(source: any, event: Y.YEvent<any> | undefined, typeResolver: ObjectTypeResolver<any>, options: SyncOptions) {
+    // Diffs is null to by default reduce the allocations if there is no change.
     let diffs: ObjectDiff[] | undefined;
 
     const sourceValue = typeResolver.syncToYjs(source);
@@ -128,6 +130,7 @@ function syncTypedObject(source: any, event: Y.YEvent<any> | undefined, typeReso
 }
 
 function syncArray(source: ReadonlyArray<unknown>, event: Y.YEvent<any> | undefined, options: SyncOptions) {
+    // Diffs is null to by default reduce the allocations if there is no change.
     let result: unknown[] | undefined = undefined;
 
     // Because of immutability we have to check if there is a change down the path.
@@ -148,6 +151,7 @@ function syncArray(source: ReadonlyArray<unknown>, event: Y.YEvent<any> | undefi
             throw new Error('Cannot sync from invalid target.');
         }
 
+        // Normal array have no type name value at the first index, so we start at zero.
         let index = 0;
         event.changes.delta.map(({ retain, insert, delete: deletion }) => {
             if (retain) {
@@ -171,6 +175,7 @@ function syncArray(source: ReadonlyArray<unknown>, event: Y.YEvent<any> | undefi
 }
 
 function syncTypedArray(source: any, event: Y.YEvent<any> | undefined, typeResolver: ArrayTypeResolver<any>, options: SyncOptions) {
+    // Diffs is null to by default reduce the allocations if there is no change.
     let diffs: ArrayDiff[] | undefined = undefined;
 
     const sourceValue = typeResolver.syncToYjs(source);
@@ -193,7 +198,8 @@ function syncTypedArray(source: any, event: Y.YEvent<any> | undefined, typeResol
             throw new Error('Cannot sync from invalid target.');
         }
 
-        let index = 0;
+        // Reduce all incoming indexes by one, because they have the initial offset of the type name.
+        let index = -1;
         event.changes.delta.map(({ retain, insert, delete: deletion }) => {
             if (retain) {
                 index += retain;

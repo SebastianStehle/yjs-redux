@@ -1,43 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import { getRootType } from './../lib/sync-internals';
-import { SyncOptions, initToYjs, syncFromYjs } from './../lib/core';
+import { getRootType, yjsToValue } from './../lib/sync-internals';
+import { SyncOptions, initToYjs, syncFromYjs, syncToYjs } from './../lib/core';
 
-export function testInitialSync(initial: () => any, update: (root: Y.AbstractType<any>, prev: any) => void, options: SyncOptions) {
-    const doc1 = new Y.Doc();
-    const doc2 = new Y.Doc();
+export function testInitialSync(initial: any, update: any, options: SyncOptions) {
+    const sourceState = initial;
+    const sourceDoc = new Y.Doc();
+    const sourceRoot = getRootType(sourceDoc, 'slice', sourceState, options);
 
-    doc1.on('update', (update: Uint8Array) => {
-        Y.applyUpdate(doc2, update); 
-    });
+    // Create an initial state on the source document.
+    initToYjs(sourceState, sourceRoot, options);
 
-    doc2.on('update', (update: Uint8Array) => {
-        Y.applyUpdate(doc1, update); 
-    });
+    const targetDoc = new Y.Doc();
 
-    const initial1 = initial();
-    const initial2 = initial();
+    // Apply the update from the source doc to the target doc to simulate a load from the database.
+    Y.applyUpdate(targetDoc, Y.encodeStateAsUpdate(sourceDoc));
 
-    const root1 = getRootType(doc1, 'slice', initial1, options);
-    const root2 = getRootType(doc2, 'slice', initial2, options);
-
-    initToYjs(initial1, root1, options);
-    initToYjs(initial2, root2, options);
+    const targetRoot = getRootType(targetDoc, 'slice', sourceState, options);
+    const targetState = yjsToValue(targetRoot, options);
 
     const state = {
-        synced: initial2
+        synced: targetState
     };
 
-    root2.observeDeep((events: any) => {
-        state.synced = syncFromYjs(initial2, events, options);
+    // Sync all changes from the source to the target.
+    sourceDoc.on('update', (update: Uint8Array) => {
+        Y.applyUpdate(targetDoc, update); 
     });
 
-    doc1.transact(() => {
-        update(root1, initial1);
+    // Observe the changes at the target.
+    targetRoot.observeDeep((events: any) => {
+        state.synced = syncFromYjs(targetState, events, options);
     });
 
-    doc1.destroy();
-    doc2.destroy();
+    sourceDoc.transact(() => {
+        syncToYjs(update, sourceState, sourceRoot, options);
+    });
 
-    return state.synced;
+    const afterRead = yjsToValue(targetRoot, options);
+
+    return { afterSync: state.synced, afterRead };
 }
