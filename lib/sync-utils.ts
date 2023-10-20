@@ -120,3 +120,10 @@ export interface ValueResolver<T> {
      */
     fromValue(source: T): Record<string, unknown>;
 }
+
+/**
+ * A value converter that is created from 2 functions.
+ */
+export function valueResolver<T>(fromYjs: (Source: SourceObject) => T, fromValue: (Source: T) => SourceObject) {
+    return { fromYjs, fromValue };
+}
