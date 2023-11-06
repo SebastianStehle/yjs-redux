@@ -78,6 +78,9 @@ export const App = () => {
             onSynced: root => {
                 setUndoManager(new Y.UndoManager(root));
             },
+            onBeforeTransaction: (transaction, action) => {
+                console.log(`Synced from jys with transaction ${transaction} and action ${action.type}.`)
+            },
             sliceName: 'tasks'
         });
 

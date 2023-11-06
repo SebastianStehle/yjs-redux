@@ -55,24 +55,32 @@ export type ConnectOptions = {
     /**
      * Invoked, when the initial sync has been done.
      */
-    onSynced?: (root: Y.AbstractType<any>) => void;
+    onSynced?: (synchronizer: SliceSynchonizer, root: Y.AbstractType<any>) => void;
 
     /**
      * Invoked, when the a sync to yjs has been completed.
      */
-    onUpdateToYjs?: () => void;
+    onUpdateToYjs?: (synchronizer: SliceSynchonizer) => void;
 
     /**
      * Invoked, when the a sync from yjs has been completed.
      */
-    onUpdateFromYjs?: () => void;
+    onUpdateFromYjs?: (synchronizer: SliceSynchonizer) => void;
 
     /**
      * Invoked, when the initial sync from yjs has been completed.
-     * 
-     * @param The initial state.
      */
-    onSyncedAsInit?: (state: any) => void;
+    onSyncedAsInit?: (synchronizer: SliceSynchonizer, state: any) => void;
+
+    /**
+     * Invoked when a new transaction is created.
+     * 
+     * @param transaction The transaction.
+     * @param action The action that has changed the state.
+     * @param newState The current state.
+     * @param oldState The previous state.
+     */
+    onBeforeTransaction?: (transaction: Y.Transaction, action: any, newState: any, oldState: any) => void;
 
     /**
      * Invoked, when the initial sync to yjs has been completed.
@@ -118,7 +126,7 @@ export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
 
                 if (newState !== oldState) {
                     for (const synchronizer of Object.values(synchronizers)) {
-                        synchronizer.sync(newState, oldState);
+                        synchronizer.sync(newState, oldState, action);
                     }
                 }
             }
@@ -171,10 +179,14 @@ export function createYjsReduxBinder(options: Partial<SyncOptions>): Binder {
 
 const log = logging.createModuleLogger('yjs-redux');
 
+/**
+ * Synchronizes one slice of the redux store to a root type of a yjs document.
+ */
 export class SliceSynchonizer {
     private isSyncTransactionRunning = false;
     private currentRoot: Y.AbstractType<any> | null = null;
     private currentStore: MiddlewareAPI | null = null;
+    private currentUpdate?: { statePrevious: any, stateCurrent: any, action: any };
 
     constructor(
         private readonly options: SyncOptions,
@@ -185,7 +197,23 @@ export class SliceSynchonizer {
         synchronizers[sliceName] = this;
     }
 
-    public sync(stateCurrent: any, statePrevious: any) {
+    /**
+     * Returns the current action if the synchronization to yjs is currently in progress.
+     * 
+     * @returns The current action.
+     */
+    public getcurrentAction() {
+        return this.currentUpdate?.action;
+    }
+
+    /**
+     * Synchronize from redux to yjs. This is triggered by the middleware.
+     * 
+     * @param stateCurrent The current state.
+     * @param statePrevious The previous state
+     * @param action The action that changed the current state to the previous state.
+     */
+    public sync(stateCurrent: any, statePrevious: any, action: any) {
         const root = this.currentRoot;
 
         if (!root) {
@@ -199,13 +227,26 @@ export class SliceSynchonizer {
             return;
         }
 
-        this.transact(() => {
-            syncToYjs(sliceCurrent, slicePrevious, root, this.options);
-        });
+        this.currentUpdate = {
+            statePrevious,
+            stateCurrent,
+            action
+        };
 
-        this.connectOptions.onUpdateToYjs?.();
+        try {
+            this.transact(() => {
+                syncToYjs(sliceCurrent, slicePrevious, root, this.options);
+            });
+        } finally {
+            this.currentUpdate = undefined;
+        }
+
+        this.connectOptions.onUpdateToYjs?.(this);
     }
 
+    /**
+     * Desroy the synchronizer and unsubscribes from all events.
+     */
     public destroy() {
         delete this.synchronizers[this.sliceName];
 
@@ -215,11 +256,13 @@ export class SliceSynchonizer {
     private subscribe(root: Y.AbstractType<any>) {
         this.currentRoot = root;
         this.currentRoot?.observeDeep(this.observerFunction);
+        this.connectOptions.document.on('beforeTransaction', this.beforeTransactionFunction);
     }
 
     private unsubscribe() {
         this.currentRoot?.unobserveDeep(this.observerFunction);
         this.currentRoot = null;
+        this.connectOptions.document.off('beforeTransaction', this.beforeTransactionFunction);
     }
 
     public connect(store: MiddlewareAPI) {
@@ -243,7 +286,7 @@ export class SliceSynchonizer {
             // If the slice already exists in the document we synchronize from the remote store to the redux store.
             store.dispatch(syncAction({ state, sliceName }));
 
-            this.connectOptions.onSyncedAsInit?.(state);
+            this.connectOptions.onSyncedAsInit?.(this, state);
         } else {
             this.transact(() => {
                 // Make an initial synchronization which also creates the root type.
@@ -253,9 +296,20 @@ export class SliceSynchonizer {
             this.connectOptions.onSyncedAsDiff?.();
         }
                 
-        this.connectOptions.onSynced?.(root);
+        this.connectOptions.onSynced?.(this, root);
         this.subscribe(root);
     }
+
+    private beforeTransactionFunction = (transaction: Y.Transaction) => {
+        if (!this.currentUpdate || !this.connectOptions.onBeforeTransaction) {
+            return;
+        }
+
+        this.connectOptions.onBeforeTransaction(transaction,
+            this.currentUpdate.action,
+            this.currentUpdate.stateCurrent,
+            this.currentUpdate.statePrevious);
+    };
 
     private observerFunction = (events: Y.YEvent<any>[]) => {
         if (!this.currentStore || this.isSyncTransactionRunning) {
@@ -272,7 +326,7 @@ export class SliceSynchonizer {
                 
             this.currentStore.dispatch(syncAction({ state: stateNew, sliceName: this.sliceName }));
 
-            this.connectOptions.onUpdateFromYjs?.();
+            this.connectOptions.onUpdateFromYjs?.(this);
         } catch (e) {
             log('Error in synchronizing from jys', e);
             throw e;
