@@ -33,13 +33,16 @@ const options: SyncOptions = {
 // Call this for every slice you want to synchronize.
 const binder = createYjsReduxBinder(options);
 
-binder.connectSlice(doc);
+binder.connectSlice({
+    document: ydoc,
+    sliceName: '<SLICE_NAME>'
+});
 
 export const store = configureStore({
     reducer: binder.enhanceReducer(combineReducers({
         ... YOUR REDUCERS
     })),
-    middleware: [binder.middleware()]
+    middleware: [binder.middleware]
 });
 
 export type RootState = ReturnType<typeof store.getState>;
