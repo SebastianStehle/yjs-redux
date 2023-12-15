@@ -10,8 +10,8 @@
   ],
   "homepage": "https://github.com/SebastianStehle/yjs-redux#Readme.md",
   "license": "MIT",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "main": "dist/yjs-redux.js",
+  "module": "dist/yjs-redux.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/SebastianStehle/yjs-redux"
@@ -24,8 +24,7 @@
     "lib"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.lib.json",
-    "build:sample": "tsc && vite build",
+    "build": "vite build",
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest --browser",
@@ -36,6 +35,7 @@
   "dependencies": {
     "lib0": "^0.2.86",
     "redux": "^4.2.1",
+    "vite-plugin-dts": "^3.6.3",
     "yjs": "^13.6.7"
   },
   "devDependencies": {
